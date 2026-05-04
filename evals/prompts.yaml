@@ -1,0 +1,317 @@
+# Lucid universal eval set.
+#
+# Each entry: id, domain, prompt, key_challenge, difficulty.
+# difficulty: easy | medium | hard (judged by stakes, ambiguity, hidden
+# constraints, and how badly a generic answer fails the user).
+#
+# domain is informational only. Lucid is universal — verticals are emergent,
+# not authored. The domain tag helps us see if Lucid wins consistently
+# across types or if certain types regress.
+
+prompts:
+  # ----- Document creation (15) -----------------------------------------
+
+  - id: doc.board_acquisition
+    domain: document
+    difficulty: hard
+    key_challenge: high stakes, multiple stakeholders, financial precision
+    prompt: >
+      Write a one-pager for our board recommending we acquire the startup
+      'Aether AI' for $48M. Include strategic fit, risks, and financial
+      impact. Keep it under one page and lead with the recommendation.
+
+  - id: doc.platform_migration_status
+    domain: document
+    difficulty: medium
+    key_challenge: technical audience, blockers + asks
+    prompt: >
+      Draft a one-page status update on the Q3 platform migration for the
+      engineering leadership team. Highlight blockers, timeline risks, and
+      what we need from them. Use clear technical language but stay concise.
+
+  - id: doc.nps_quarterly
+    domain: document
+    difficulty: easy
+    key_challenge: low stakes, light tone, internal broadcast
+    prompt: >
+      Create a quick one-pager summarizing last quarter's customer NPS
+      results for the broader company. Keep it light, positive where
+      possible, and end with 2-3 key takeaways.
+
+  - id: doc.sales_kickoff_pricing
+    domain: document
+    difficulty: hard
+    key_challenge: hidden constraint (CRO hates slides), word cap, audience tone
+    prompt: >
+      I need something for the sales kickoff about our new pricing tiers.
+      Make it punchy and under 400 words. The CRO hates slides so this has
+      to stand alone.
+
+  - id: doc.pause_horizon
+    domain: document
+    difficulty: hard
+    key_challenge: political reading, recommendation against momentum
+    prompt: >
+      Write a one-pager recommending we pause the 'Project Horizon'
+      initiative. My manager is very risk-averse and the CFO is watching
+      costs closely. Be direct but don't burn political capital.
+
+  - id: doc.eu_first_launch
+    domain: document
+    difficulty: hard
+    key_challenge: cross-functional, regulatory, sequencing decision
+    prompt: >
+      Draft a decision memo for Product, Engineering, and Marketing on
+      whether to launch the new mobile app feature in EU before US. Include
+      regulatory, resource, and go-to-market considerations.
+
+  - id: doc.data_incident
+    domain: document
+    difficulty: hard
+    key_challenge: tone calibration (transparent but not alarmist), facts + plan
+    prompt: >
+      We had a data incident last week affecting ~2,400 users. Write a
+      one-pager for the exec team explaining what happened, impact, and our
+      response plan. Tone should be transparent but not alarmist.
+
+  - id: doc.investor_bridge
+    domain: document
+    difficulty: medium
+    key_challenge: founder voice, honesty about runway and decision
+    prompt: >
+      Create a one-page update for our seed investors on runway, key
+      metrics, and the decision we're facing about raising a bridge round
+      vs extending. Keep it founder-voice and honest.
+
+  - id: doc.head_of_design_hire
+    domain: document
+    difficulty: medium
+    key_challenge: business case, comparison to status quo
+    prompt: >
+      Write a one-pager making the case to hire a Head of Design instead of
+      continuing with contractors. Audience is the CEO and Head of People.
+      Focus on business impact and cost.
+
+  - id: doc.inference_for_non_technical
+    domain: document
+    difficulty: medium
+    key_challenge: jargon translation, customer-impact framing
+    prompt: >
+      Summarize our new AI inference architecture in a one-pager for the
+      sales and customer success teams. No jargon, focus on what it means
+      for customers and support load.
+
+  - id: doc.competitor_response
+    domain: document
+    difficulty: medium
+    key_challenge: trade-offs, "or not" framing
+    prompt: >
+      Our biggest competitor just launched a feature we were planning for
+      Q4. Draft a one-pager for the product team recommending how we should
+      respond (or not). Include trade-offs.
+
+  - id: doc.data_retention_policy
+    domain: document
+    difficulty: medium
+    key_challenge: non-legalistic, ends with checklist, broad audience
+    prompt: >
+      Write a one-pager for all employees explaining the new data retention
+      policy and what changes in their day-to-day work. Make it clear,
+      non-legalistic, and end with a simple checklist.
+
+  - id: doc.phoenix_postmortem
+    domain: document
+    difficulty: easy
+    key_challenge: positive frame, lessons + acknowledgments
+    prompt: >
+      Create a one-page summary of what made the 'Phoenix' rebrand project
+      successful. Audience is the full company. Highlight 4-5 key lessons
+      and the people who made it happen.
+
+  - id: doc.aws_to_gcp
+    domain: document
+    difficulty: hard
+    key_challenge: 18-month plan, cost + performance + migration
+    prompt: >
+      Recommend we switch our primary cloud provider from AWS to GCP.
+      One-pager for the CTO and CFO. Focus on cost, performance, and
+      migration effort over 18 months.
+
+  - id: doc.okr_framework
+    domain: document
+    difficulty: hard
+    key_challenge: balanced, multi-stakeholder, 90-day success criteria
+    prompt: >
+      I need a one-pager about the new OKR framework for the all-hands.
+      Some teams love it, some hate it. Make it balanced, explain why we're
+      doing it, and what success looks like in the first 90 days.
+
+  # ----- Creative writing (2) -------------------------------------------
+
+  - id: creative.unreliable_narrator
+    domain: creative
+    difficulty: hard
+    key_challenge: dual-layer narrative, sensory detail vs. internal monologue
+    prompt: >
+      Write a short story about a high-stakes heist told from the
+      perspective of a character who is clearly misinterpreting the actions
+      of their teammates. Use sensory details to show the 'truth' while the
+      narrator's internal monologue explains it away as something else.
+
+  - id: creative.cyberpunk_victorian
+    domain: creative
+    difficulty: medium
+    key_challenge: genre fusion worldbuilding, specific concrete details
+    prompt: >
+      Describe a bustling marketplace in a 'Cyberpunk-Victorian' London.
+      Focus on the fusion of steam-powered machinery and holographic
+      interfaces. What are the three most common illegal items being sold
+      under the table?
+
+  # ----- Business strategy (2) ------------------------------------------
+
+  - id: business.premortem
+    domain: business
+    difficulty: medium
+    key_challenge: contrarian framing, non-obvious failure modes
+    prompt: >
+      I am launching a subscription-based plant delivery service. Act as a
+      cynical business consultant. Identify five non-obvious reasons why
+      this business might fail within the first six months and provide a
+      mitigation strategy for each.
+
+  - id: business.ad_scripts_three_angles
+    domain: business
+    difficulty: medium
+    key_challenge: audience targeting, three distinct emotional angles
+    prompt: >
+      Write three distinct 30-second scripts for a social media video ad
+      targeting burnt-out remote workers. Script A should focus on FOMO,
+      Script B on Emotional Relief, and Script C on Logic/Efficiency.
+
+  # ----- Tech & programming (2) -----------------------------------------
+
+  - id: tech.code_optimizer
+    domain: code
+    difficulty: medium
+    key_challenge: refactor with explanation, Big O reasoning
+    prompt: >
+      Review the following Python code snippet. Your goal is to refactor it
+      for maximum readability and performance. Explain why you made each
+      change, specifically focusing on Big O notation improvements.
+
+      def find_dupes(items):
+          dupes = []
+          for i in range(len(items)):
+              for j in range(len(items)):
+                  if i != j and items[i] == items[j] and items[i] not in dupes:
+                      dupes.append(items[i])
+          return dupes
+
+  - id: tech.ux_critique
+    domain: code
+    difficulty: medium
+    key_challenge: domain expertise (UX research), specific suggestions
+    prompt: >
+      Act as a Senior UX Researcher. Analyze the user flow for a meditation
+      app for seniors. Identify potential friction points in the onboarding
+      process and suggest three 'micro-interactions' that would improve
+      user retention.
+
+  # ----- Lifestyle & wellness (2) ---------------------------------------
+
+  - id: lifestyle.fridge_raid
+    domain: lifestyle
+    difficulty: easy
+    key_challenge: constraint satisfaction, playful tone
+    prompt: >
+      I have half an onion, a can of chickpeas, soy sauce, and stale bread.
+      Create a gourmet-style recipe using only these items plus basic
+      pantry staples. Give it a pretentious name you'd find at a 5-star
+      bistro.
+
+  - id: lifestyle.stoic_overwhelmed
+    domain: lifestyle
+    difficulty: medium
+    key_challenge: empathy + philosophical grounding + actionable
+    prompt: >
+      I am feeling overwhelmed by the volume of unfinished projects on my
+      plate at work. Provide a perspective-shifting response using the
+      principles of Stoicism. End with three small, actionable steps I can
+      take in the next hour to regain a sense of agency.
+
+  # ----- Education & learning (2) ---------------------------------------
+
+  - id: education.feynman_entanglement
+    domain: education
+    difficulty: hard
+    key_challenge: dual-level explanation, naming the simplification cost
+    prompt: >
+      Explain the concept of Quantum Entanglement to me as if I am 10
+      years old. Then, explain it again to me as if I am a first-year PhD
+      student. Highlight the nuance lost in the simpler explanation.
+
+  - id: education.socratic_french_revolution
+    domain: education
+    difficulty: medium
+    key_challenge: question-led pedagogy, no spoilers
+    prompt: >
+      I want to learn about the French Revolution. Instead of giving me a
+      summary, ask me a series of leading questions that help me deduce the
+      socio-economic causes myself. Wait for my answer after each question.
+
+  # ----- Content creation & marketing (2) --------------------------------
+
+  - id: content.viral_thread
+    domain: content
+    difficulty: medium
+    key_challenge: hook design, format adherence
+    prompt: >
+      Create a 10-post Twitter/X thread based on this blog post excerpt:
+      'Most productivity advice fails because it treats time as the bottleneck.
+      In knowledge work, the real bottleneck is decision fatigue.'
+      Ensure the first hook is 'scroll-stopping' and uses a 'Common Myth vs.
+      Reality' format.
+
+  - id: content.brand_voice_apple
+    domain: content
+    difficulty: easy
+    key_challenge: voice transfer, punchy sentences
+    prompt: >
+      Rewrite the following product description in the style of Apple:
+      'Our new water bottle holds 32oz, is BPA-free, comes in five colors,
+      and has a wide mouth for easy filling. Made of stainless steel.'
+      Focus on punchy sentences and a distinct tonal identity.
+
+  # ----- Roleplay & gaming (2) ------------------------------------------
+
+  - id: roleplay.rusty_spoke_tavern
+    domain: roleplay
+    difficulty: medium
+    key_challenge: atmospheric writing, three NPCs + secret society hint
+    prompt: >
+      I am entering a tavern called 'The Rusty Spoke.' Describe the
+      atmosphere, the three most suspicious NPCs currently at the bar, and
+      one subtle detail that suggests the tavern is actually a front for a
+      secret society.
+
+  - id: roleplay.alt_history_1920_radio
+    domain: roleplay
+    difficulty: hard
+    key_challenge: alternate-timeline coherence, period voice
+    prompt: >
+      Act as a radio news broadcaster from the year 1920, but in an
+      alternate timeline where Leonardo da Vinci's flying machine designs
+      were successfully mass-produced in the 1500s. What is the lead story
+      today?
+
+  # ----- Data & analysis (1) --------------------------------------------
+
+  - id: data.urban_gardening_black_swans
+    domain: data
+    difficulty: hard
+    key_challenge: speculative analysis, three distinct mechanisms
+    prompt: >
+      Analyze the current state of Urban Gardening. Based on emerging
+      technologies and shifting consumer habits, predict three 'Black Swan'
+      events that could radically transform this industry by 2030.

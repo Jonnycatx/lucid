@@ -33,6 +33,10 @@ htmlcov/
 *.local.yaml
 .lucid/
 
+# Eval run outputs (keep directory via .gitkeep)
+evals/results/*
+!evals/results/.gitkeep
+
 # IDEs
 .vscode/
 .idea/
