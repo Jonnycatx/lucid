@@ -1,14 +1,18 @@
-"""Tests for the Lucid MCP server's tool logic.
+"""Tests for the Lucid MCP server's pipeline.
 
-These tests exercise the pure-Python helper `run_lucid`, not the MCP transport.
-That keeps the suite fast and avoids needing to spin up a stdio server.
+Tests run with `client=None` to skip real API calls. The Listener uses only
+defaults + caller-provided answers; the Translator returns stub output. This
+exercises every branch of the pipeline without needing an API key.
 """
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import pytest
 
 from lucid.server import run_lucid
+from lucid.translator import STUB_OUTPUT_PREFIX
 from lucid.verticals._loader import reset_registry_cache
 
 
@@ -19,52 +23,171 @@ def _clear_registry_cache():
     reset_registry_cache()
 
 
-def test_run_lucid_matches_one_pager():
-    out = run_lucid("write a one-pager about our Q3 roadmap for the leadership team")
-    assert out["status"] == "stub"
+# ----- needs_clarification path -------------------------------------------
+
+
+def test_run_lucid_returns_clarification_when_required_answers_missing():
+    """No client + no answers → Listener can't fill required questions."""
+    out = run_lucid(
+        "write a one-pager about our Q3 roadmap",
+        client=None,
+    )
+    assert out["status"] == "needs_clarification"
+    qids = {q["id"] for q in out["questions_to_ask"]}
+    # `audience` and `purpose` are required and have no defaults
+    assert qids == {"audience", "purpose"}
+    # Optional questions with defaults are already filled in answers_so_far
+    assert out["answers_so_far"]["stakes"] == "medium"
+
+
+def test_clarification_questions_carry_why_it_matters():
+    """The 'why it matters' field is surfaced so the client can ask well."""
+    out = run_lucid("write a one-pager", client=None)
+    for q in out["questions_to_ask"]:
+        assert "why_it_matters" in q
+        assert len(q["why_it_matters"]) > 0
+
+
+# ----- complete path ------------------------------------------------------
+
+
+def test_run_lucid_completes_when_all_required_answers_provided():
+    """With required answers provided, the pipeline runs end-to-end (stub Translator)."""
+    out = run_lucid(
+        "should we sunset product X?",
+        vertical_hint="document.one_pager",
+        answers={"audience": "executive team", "purpose": "decision"},
+        client=None,
+    )
+    assert out["status"] == "complete"
     assert out["vertical"]["id"] == "document.one_pager"
-    assert out["intent"].startswith("write a one-pager")
-    # Listener's questions are surfaced
-    qids = {q["id"] for q in out["questions_listener_would_ask"]}
-    assert qids == {"audience", "purpose", "stakes", "constraints"}
+    assert out["answers_used"]["audience"] == "executive team"
+    assert out["answers_used"]["purpose"] == "decision"
+    # Optional question default is applied
+    assert out["answers_used"]["stakes"] == "medium"
+    # Translator is in stub mode (no client)
+    assert out["result"].startswith(STUB_OUTPUT_PREFIX)
+    assert out["model_used"] == "(stub)"
 
 
-def test_run_lucid_no_match():
-    out = run_lucid("what time is it in Tokyo")
+def test_complete_response_includes_rendered_prompt():
+    """The rendered prompt is returned for debugging / eval purposes."""
+    out = run_lucid(
+        "should we sunset product X?",
+        vertical_hint="document.one_pager",
+        answers={"audience": "executive team", "purpose": "decision"},
+        client=None,
+    )
+    assert "should we sunset product X?" in out["rendered_prompt"]
+    assert "executive team" in out["rendered_prompt"]
+
+
+def test_run_lucid_calls_real_models_when_client_provided():
+    """With a mocked Anthropic client, both Listener and Translator are invoked."""
+    # Listener mock — extracts both required answers from the intent.
+    listener_tool_use = MagicMock(type="tool_use")
+    listener_tool_use.name = "record_answers"
+    listener_tool_use.input = {"audience": "the board", "purpose": "decision"}
+    listener_response = MagicMock()
+    listener_response.content = [listener_tool_use]
+
+    # Translator mock — returns the document text.
+    translator_text = MagicMock(type="text")
+    translator_text.text = "## Recommendation\n\nProceed."
+    translator_response = MagicMock()
+    translator_response.content = [translator_text]
+
+    client = MagicMock()
+    # First call is Listener (uses tools=); second is Translator (no tools).
+    client.messages.create.side_effect = [listener_response, translator_response]
+
+    out = run_lucid(
+        "draft a brief recommending we sunset product X for the board",
+        client=client,
+    )
+    assert out["status"] == "complete"
+    assert out["result"] == "## Recommendation\n\nProceed."
+    assert out["answers_used"]["audience"] == "the board"
+    assert out["answers_used"]["purpose"] == "decision"
+    assert client.messages.create.call_count == 2
+
+
+# ----- no_match / unknown_hint paths --------------------------------------
+
+
+def test_run_lucid_no_match_with_unrelated_intent():
+    out = run_lucid("what time is it in Tokyo", client=None)
     assert out["status"] == "no_match"
-    assert "No vertical matched" in out["message"]
     assert "document.one_pager" in out["available_verticals"]
 
 
-def test_run_lucid_with_explicit_hint():
+def test_run_lucid_with_explicit_hint_skips_triage():
+    """vertical_hint forces the vertical even when triage wouldn't match."""
     out = run_lucid(
-        "this request has no keywords",
+        "this has no keywords at all",
         vertical_hint="document.one_pager",
+        answers={"audience": "team", "purpose": "update"},
+        client=None,
     )
-    assert out["status"] == "stub"
+    assert out["status"] == "complete"
     assert out["vertical"]["id"] == "document.one_pager"
 
 
 def test_run_lucid_with_unknown_hint():
-    out = run_lucid("anything", vertical_hint="not.a.real.vertical")
+    out = run_lucid("anything", vertical_hint="not.a.real.vertical", client=None)
     assert out["status"] == "unknown_hint"
-    assert "not.a.real.vertical" in out["message"]
     assert "document.one_pager" in out["available_verticals"]
 
 
-def test_response_shape_is_serializable():
-    """The dict returned must be JSON-serializable so MCP can transport it."""
+# ----- multi-turn clarification loop --------------------------------------
+
+
+def test_clarification_then_completion_two_turns():
+    """The classic flow: first call asks for missing info; second call with
+    answers completes the pipeline."""
+    intent = "draft a memo for the board"
+    # Turn 1: ambiguous request, no answers.
+    turn1 = run_lucid(intent, client=None)
+    assert turn1["status"] == "needs_clarification"
+
+    missing = {q["id"] for q in turn1["questions_to_ask"]}
+    # User provides what was missing
+    user_answers = {qid: "team" if qid == "audience" else "decision" for qid in missing}
+
+    # Turn 2: same intent, answers supplied.
+    turn2 = run_lucid(intent, answers=user_answers, client=None)
+    assert turn2["status"] == "complete"
+
+
+# ----- serialization & decorator pass-through ------------------------------
+
+
+def test_response_is_json_serializable_for_complete():
     import json
 
-    out = run_lucid("draft an executive summary of the customer research")
-    json.dumps(out)  # must not raise
+    out = run_lucid(
+        "draft a one-pager",
+        answers={"audience": "team", "purpose": "update"},
+        client=None,
+    )
+    json.dumps(out)
 
 
-def test_lucid_run_tool_is_directly_callable():
-    """The @mcp.tool-decorated function should still be callable as a normal
-    Python function. If FastMCP ever changes this, our tests need to know."""
+def test_response_is_json_serializable_for_clarification():
+    import json
+
+    out = run_lucid("write a one-pager", client=None)
+    json.dumps(out)
+
+
+def test_lucid_run_mcp_tool_is_directly_callable():
+    """The @mcp.tool-decorated function still works as a regular Python function."""
     from lucid.server import lucid_run
 
-    out = lucid_run("write a one-pager about Q3 roadmap")
-    assert out["status"] == "stub"
-    assert out["vertical"]["id"] == "document.one_pager"
+    out = lucid_run(
+        "draft a one-pager about sunsetting product X",
+        answers={"audience": "execs", "purpose": "decision"},
+    )
+    # Without ANTHROPIC_API_KEY in env, the default client is None, so this
+    # falls through to the stub translator and returns 'complete' with stub output.
+    assert out["status"] == "complete"

@@ -3,35 +3,50 @@
 Exposes Lucid's fluency layer as a Model Context Protocol server. Any
 MCP-compatible client (Claude, Cursor, Zed, others) can use it.
 
-v0.1 surface:
-  - lucid_run(intent, vertical_hint=None)
-    Triage-only stub. Returns the matched vertical and the questions the
-    Listener would ask. The full pipeline (Listener → Translator →
-    Validator → Memory) is implemented in Phase 2 and beyond.
+v0.2 surface:
+  - lucid_run(intent, vertical_hint=None, answers=None)
+    Runs the pipeline: triage → Listener → (clarify or Translator) → result.
+
+    If the Listener needs more info, returns status='needs_clarification'
+    with the missing questions. The client surfaces those to the user, gets
+    answers, and calls back with the answers parameter populated.
+
+    If the Listener completes (all required answers known, defaults applied
+    for optional ones), the Translator runs the configured execution model
+    and returns status='complete' with the output.
 
 Run as a stdio MCP server:
     lucid                       # via the console script defined in pyproject.toml
     python -m lucid.server      # equivalent direct invocation
+
+Set ANTHROPIC_API_KEY in the environment for the pipeline to call models.
+Without the key, the Translator returns the rendered prompt as a stub so
+you can still see what would be sent.
 """
 
 from __future__ import annotations
 
-from typing import Any, Optional
+import os
+from typing import Any, Optional, TYPE_CHECKING
 
 from mcp.server.fastmcp import FastMCP
 
+from lucid.listener import run_listener
+from lucid.translator import run_translator
 from lucid.verticals._loader import load_registry, triage
 from lucid.verticals._schema import Vertical
+
+if TYPE_CHECKING:
+    from anthropic import Anthropic
 
 
 mcp = FastMCP("lucid")
 
 
-# ----- Internal helpers (testable without going through MCP transport) ----
+# ----- Internal helpers ---------------------------------------------------
 
 
 def _vertical_summary(v: Vertical) -> dict[str, Any]:
-    """Compact serialization of a vertical for tool responses."""
     return {
         "id": v.id,
         "name": v.name,
@@ -40,30 +55,47 @@ def _vertical_summary(v: Vertical) -> dict[str, Any]:
     }
 
 
-def _questions_summary(v: Vertical) -> list[dict[str, Any]]:
-    """Serialize the Listener's question schema for tool responses."""
-    return [
-        {
-            "id": q.id,
-            "prompt": q.prompt,
-            "type": q.type.value,
-            "required": q.required,
-            "options": q.options,
-            "why_it_matters": q.why_it_matters,
-        }
-        for q in v.questions
-    ]
+def _question_lookup(v: Vertical, qid: str) -> dict[str, Any]:
+    q = next(q for q in v.questions if q.id == qid)
+    return {
+        "id": q.id,
+        "prompt": q.prompt,
+        "type": q.type.value,
+        "required": q.required,
+        "options": list(q.options),
+        "why_it_matters": q.why_it_matters,
+    }
 
 
-def run_lucid(intent: str, vertical_hint: Optional[str] = None) -> dict[str, Any]:
-    """Pure-Python implementation of the lucid_run tool.
+def _make_default_client() -> Optional["Anthropic"]:
+    """Construct an Anthropic client from ANTHROPIC_API_KEY, or return None
+    if the env var is unset. Returning None puts the pipeline in stub mode."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return None
+    from anthropic import Anthropic
 
-    Separated from the MCP-decorated function so tests can call it directly
-    without spinning up the MCP transport.
+    return Anthropic()
+
+
+# ----- Pipeline (testable Python entry) -----------------------------------
+
+
+def run_lucid(
+    intent: str,
+    vertical_hint: Optional[str] = None,
+    answers: Optional[dict[str, Any]] = None,
+    *,
+    client: Optional["Anthropic"] = None,
+) -> dict[str, Any]:
+    """Run the full Lucid pipeline.
+
+    The MCP-decorated `lucid_run` tool delegates to this function, supplying
+    a default client built from ANTHROPIC_API_KEY. Tests bypass the env var
+    by passing client= directly.
     """
     registry = load_registry()
 
-    # If the caller forced a vertical, use it (or report unknown).
+    # Vertical resolution: explicit hint wins over triage.
     if vertical_hint:
         vertical = registry.get(vertical_hint)
         if vertical is None:
@@ -83,22 +115,54 @@ def run_lucid(intent: str, vertical_hint: Optional[str] = None) -> dict[str, Any
         return {
             "status": "no_match",
             "message": (
-                "No vertical matched the request. In v0.1 this returns a stub. "
-                "Later phases will fall through to a generic baseline pipeline."
+                "No vertical matched the request. Later phases will fall through "
+                "to a generic baseline pipeline."
             ),
             "intent": intent,
             "available_verticals": sorted(registry.keys()),
         }
 
+    # Listener
+    listener = run_listener(
+        intent=intent,
+        vertical=vertical,
+        answers_provided=answers,
+        client=client,
+    )
+
+    if listener.needs_clarification:
+        return {
+            "status": "needs_clarification",
+            "message": (
+                "Lucid needs more information before producing the output. "
+                "Surface the questions below to the user and call lucid_run "
+                "again with their answers in the `answers` parameter."
+            ),
+            "intent": intent,
+            "vertical": _vertical_summary(vertical),
+            "answers_so_far": listener.answers,
+            "questions_to_ask": [
+                _question_lookup(vertical, qid) for qid in listener.missing_required
+            ],
+        }
+
+    # Translator
+    translator = run_translator(
+        intent=intent,
+        vertical=vertical,
+        answers=listener.answers,
+        client=client,
+    )
+
     return {
-        "status": "stub",
-        "message": (
-            "Lucid v0.1 skeleton. Vertical triage completed. "
-            "The full Listener → Translator → Validator pipeline is not yet implemented."
-        ),
+        "status": "complete",
         "intent": intent,
         "vertical": _vertical_summary(vertical),
-        "questions_listener_would_ask": _questions_summary(vertical),
+        "answers_used": listener.answers,
+        "extracted_from_intent": listener.extracted_from_intent,
+        "result": translator.output,
+        "model_used": translator.model_used,
+        "rendered_prompt": translator.rendered_prompt,
     }
 
 
@@ -106,21 +170,33 @@ def run_lucid(intent: str, vertical_hint: Optional[str] = None) -> dict[str, Any
 
 
 @mcp.tool()
-def lucid_run(intent: str, vertical_hint: Optional[str] = None) -> dict[str, Any]:
+def lucid_run(
+    intent: str,
+    vertical_hint: Optional[str] = None,
+    answers: Optional[dict[str, str]] = None,
+) -> dict[str, Any]:
     """Run the Lucid fluency layer on a user request.
-
-    In v0.1 this is a skeleton: it performs vertical triage and returns the
-    matched vertical along with the questions the Listener would ask. The
-    full pipeline is implemented in later phases.
 
     Args:
       intent: The user's raw request.
       vertical_hint: Optional vertical id to use directly, bypassing triage.
+      answers: Optional pre-filled answers (used after a prior call returned
+        status='needs_clarification' and the user supplied the missing info).
 
     Returns:
-      A structured dict describing what would happen. See README for schema.
+      A structured dict with one of these statuses:
+        - 'complete': pipeline ran end-to-end; .result holds the output
+        - 'needs_clarification': Listener needs more info; .questions_to_ask
+          holds what to ask the user
+        - 'no_match': triage found no fitting vertical
+        - 'unknown_hint': vertical_hint did not match a known vertical
     """
-    return run_lucid(intent=intent, vertical_hint=vertical_hint)
+    return run_lucid(
+        intent=intent,
+        vertical_hint=vertical_hint,
+        answers=answers,
+        client=_make_default_client(),
+    )
 
 
 # ----- Entry point --------------------------------------------------------
