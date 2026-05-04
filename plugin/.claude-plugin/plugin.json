@@ -1,0 +1,12 @@
+{
+  "name": "lucid",
+  "version": "0.1.0",
+  "description": "The fluency layer between human intent and AI output. Lucid listens for true intent, translates it into the optimal prompt for the model, and returns dramatically better output without the user having to learn how to prompt.",
+  "author": {
+    "name": "Jonathan Fiorucci"
+  },
+  "homepage": "https://github.com/Jonnycatx/lucid",
+  "repository": "https://github.com/Jonnycatx/lucid",
+  "license": "MIT",
+  "keywords": ["fluency", "prompt-engineering", "mcp", "anthropic", "claude", "ai-infrastructure"]
+}

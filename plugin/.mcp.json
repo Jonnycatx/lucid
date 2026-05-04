@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "lucid": {
+      "command": "python",
+      "args": ["-m", "lucid.server"],
+      "env": {
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
+      }
+    }
+  }
+}
