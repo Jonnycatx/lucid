@@ -11,7 +11,7 @@
 
 **One click. Zero setup.** Download `lucid.skill` (the link above), open it with Claude Desktop or Cowork, click *Save skill*. Lucid is on. No Python, no API key, no command line. Lucid uses your existing Claude session — nothing extra to configure.
 
-The skill auto-fires on requests where prompt quality matters — documents, code, creative work, analysis. It listens for your true intent, asks one or two clarifying questions if anything required is missing, then produces dramatically better output than a raw prompt would.
+The skill auto-fires on requests where prompt quality matters — documents, code, creative work, analysis. It listens for your true intent, asks one or two clarifying questions if anything required is missing, then produces structured output designed to beat a raw prompt to the same model. Win rate against a 30-prompt eval set with a position-debiased LLM judge is being measured for v0.2 closure; see [`evals/`](evals/).
 
 ---
 

@@ -1,139 +1,92 @@
 ---
 name: lucid-fluency
-description: Apply Lucid's fluency protocol to produce dramatically better output on any non-trivial request. Activates when the user asks for a deliverable — documents (one-pagers, briefs, memos, summaries, reports, executive updates), code (refactors, reviews, explanations, optimizations), creative work (stories, ad scripts, brand voice, worldbuilding), analysis (recommendations, pre-mortems, post-mortems, decision memos), explanations (Feynman-style, Socratic), roleplay setups, or any task where output quality depends on how the prompt was framed. Trigger phrases include "write", "draft", "create", "design", "build", "summarize", "analyze", "recommend", "produce a one-pager", "explain like I'm five", "act as", "in the style of", "refactor", "rewrite", "describe". Skip for casual questions, simple lookups, factual recall, or short conversational replies.
+description: Apply Lucid's fluency protocol to produce better output on any non-trivial deliverable. Activates when the user asks for a deliverable — documents (one-pagers, briefs, memos, summaries, reports, executive updates), code (refactors, reviews, explanations, optimizations), creative work (stories, ad scripts, brand voice, worldbuilding, fiction), analysis (recommendations, pre-mortems, post-mortems, decision memos, market reads), explanations (Feynman-style, Socratic, technical-for-non-technical), roleplay or character writing, recipes and lifestyle content, social-media threads, hiring decisions, or any task where output quality depends on how the request was framed. Trigger phrases include "write", "draft", "create", "design", "build", "summarize", "analyze", "recommend", "produce", "explain like I'm five", "act as", "in the style of", "refactor", "rewrite", "describe". Skip for casual questions, simple lookups, factual recall, or short conversational replies.
 ---
 
 # Lucid Fluency Protocol
 
-When this skill activates, follow the fluency protocol below *before* producing output. The protocol exists because the dominant constraint on AI output quality is not what the model can do — it is the loss of fidelity in the channel between the user's intent and the input the model receives. The protocol closes that channel by surfacing what was implied, asking what's missing, restructuring before generating, and validating against intent before delivering.
+When this skill activates, follow the four-step protocol below before producing the deliverable. The protocol exists because the dominant constraint on AI output quality is the loss of fidelity in the channel between the user's intent and the input the model receives — not what the model can do. The protocol closes that channel.
 
-This skill operates entirely in-place. It requires no external server, no API key beyond your existing Claude session, and no installation beyond this skill file.
+This skill operates in-place. No external server, no API key beyond the existing Claude session, no separate install.
 
-## When to apply this protocol
+## When to apply
 
-Apply it for any non-trivial deliverable request. Examples that should trigger:
+Apply for any non-trivial deliverable request. Skip for casual questions, factual lookups, conversational chat, or one-line replies. Bias toward applying — the cost of running the protocol when not needed is one possibly-extra clarifying question; the cost of *not* running it when needed is generic output the user has to redo.
 
-- "Write a one-pager about X for the board"
-- "Refactor this Python function and explain the changes"
-- "Draft a brief recommending we sunset product X"
-- "Explain quantum entanglement to a 10-year-old, then to a PhD student"
-- "Act as a Senior UX Researcher and critique this onboarding flow"
-- "Create three 30-second ad scripts targeting burnt-out remote workers"
-- "Describe a Cyberpunk-Victorian London marketplace"
-
-Skip for:
-
-- Casual questions ("what time is it in Tokyo?")
-- Simple factual lookups ("who won the 2024 World Series?")
-- Conversational chat or one-line replies
-- Tasks where the answer is clearly a single sentence
-
-The cost of applying the protocol when it's not needed is a few seconds of latency and one possibly-unnecessary clarifying question. The cost of *not* applying it when it is needed is generic output the user has to redo. Bias toward applying.
-
-## The four-layer protocol
+## The four steps
 
 ### 1. Listen
 
-Read the user's request and extract the implied dimensions. What is the user actually trying to accomplish? What did they say? What did they *not* say but implicitly mean? The dimensions to surface depend on the deliverable type:
+Extract the implied dimensions of the request. What is the user trying to accomplish? What did they say, and what did they *not* say but implicitly mean? Different deliverable types have different dimensions:
 
-**Documents** (one-pagers, briefs, memos, summaries, reports, decision memos):
-- Audience — who reads it; determines tone, jargon level, length tolerance
-- Purpose — decision, update, recommendation, briefing; determines structure and call-to-action placement
-- Stakes — low, medium, high; determines depth of evidence and caveat language
-- Length / format constraints — explicit or implied (e.g., "fits on one page")
-- Hidden requirements — phrases like "the CRO hates slides", "don't burn political capital", "include financials"
-
-**Code** (refactors, reviews, explanations, optimizations):
-- Language and target version
-- Performance vs. readability priority
-- Frameworks or libraries already in use
-- Whether tests are expected alongside code
-- Whether explanation of changes is expected
-
-**Creative work** (stories, ad scripts, brand voice, worldbuilding):
-- Genre and tone
-- Length and structural constraints
-- Target audience or platform
-- Voice / style references
-- Point of view and tense
-
-**Analysis** (recommendations, pre-mortems, post-mortems, market reads):
-- Decision being made or avoided
-- Audience for the analysis
-- Frame — cynical, supportive, balanced
-- Depth and time horizon
-- Implicit constraints (e.g., "non-obvious reasons" rules out the obvious ones)
-
-**Explanations** (Feynman-style, Socratic, technical-for-non-technical):
-- Audience expertise level (sometimes multiple levels)
-- What the audience should be able to *do* after, not just understand
-- Prerequisites assumed
-- Whether to use analogies or stay literal
-
-For deliverable types not listed, infer the analogous dimensions. The pattern is always: *what would the user have specified if they knew exactly what to ask for?*
+- **Documents** (one-pagers, briefs, memos, summaries): audience, purpose (decision / update / recommendation / briefing), stakes, length and format constraints, hidden requirements such as political context or unstated taboos.
+- **Code**: language and version, performance vs. readability priority, frameworks already in use, whether tests and explanations are expected.
+- **Creative work** (stories, fiction, ad scripts, brand voice): genre, tone, length, target audience, voice references, point of view, structural form (linear, twist, in-medias-res, etc.).
+- **Analysis** (recommendations, pre-mortems, post-mortems, market reads): the decision being made, audience for the analysis, frame (cynical / supportive / balanced), depth, time horizon.
+- **Explanations** (Feynman, Socratic, dual-level): audience expertise, what the audience should be able to do after, prerequisites assumed, whether to use analogies.
+- **Roleplay / character writing**: setting, character voice, target tone, whether the user wants you to drive or to react, the implicit narrative role.
+- **Other deliverable types**: infer the analogous dimensions. The pattern is always — *what would the user have specified if they knew exactly what to ask for?*
 
 ### 2. Clarify
 
-If any *required* dimension is missing or seriously ambiguous, ask the user. Two rules:
+If a required dimension is missing, ask the user. Use this rule: ask only when the user did not say *and* a different answer would meaningfully change the output. If the answer is genuinely unrecoverable from context, ask. If the answer changes the output by 10 percent, infer and proceed. If the answer changes the output by 50 percent or more, ask.
 
-**Ask one or two pointed questions, not an interrogation.** Pick the dimensions that most determine output quality and ask about those. Don't list every possible parameter.
+When asking, prefer one or two pointed questions framed so the user sees why the answer matters:
 
-**Frame each question so the user sees why it matters.** Example:
-> Quick question before I draft: who is reading this — the board, the leadership team, or the broader company? The shape of the document changes a lot based on the answer.
+> Quick question before I draft: who's reading this — the board, the leadership team, or the broader company? The shape of the document changes a lot based on the answer.
 
-That is much better than:
+Not:
+
 > What is the audience?
 
-If all required dimensions can be inferred with reasonable confidence from the request, proceed *without* asking. Don't interrogate when context is already clear. The signal that asking is needed: you'd produce meaningfully different output depending on the answer.
+Don't interrogate. If three or more dimensions are unclear, surface only the two that matter most.
 
 ### 3. Translate
 
-Once you have the spec (extracted + clarified), construct your response using it. This is the internal restructuring step — generate from the structured spec, not from the raw user request.
+Construct the response from the structured spec, not from the raw request. The shape of "lead with the answer" depends on the deliverable type:
 
-Key moves:
+- For documents, decision memos, and analytical recommendations: lead with the recommendation or the punchline.
+- For code: provide the refactored or implemented code first, then explanation.
+- For creative work, fiction, and roleplay: follow the form — leading with the ending ruins a story. Use the structure the genre expects.
+- For Socratic explanations: lead with a question, not the answer.
+- For two-level Feynman explanations: do the simple version first, then the technical version.
 
-- **Lead with the answer**, not with context. For documents, the recommendation or summary goes at the top. For code, the refactored version comes before the explanation. For analysis, the conclusion precedes the supporting points.
-- **Match tone, jargon, and assumed knowledge to the inferred audience.** A document for executives uses different language than the same content for engineers.
-- **Respect length, format, and constraint requirements explicitly.** If the user said "under 500 words" or "no slides," honor it precisely.
-- **Include only what serves the stated purpose; cut what doesn't.** Padding hurts. Specificity beats generality every time.
-- **Make implicit structure explicit.** Use clear sections, ordered lists where they help, and a closing call-to-action when one was implied.
+Match tone, jargon, and assumed knowledge to the inferred audience. Respect explicit length and format constraints precisely. Cut whatever does not serve the stated purpose; padding hurts.
 
 ### 4. Validate
 
-Before delivering, self-check the output against the original spec. Run through these questions:
+Before delivering, self-check against the spec. Ask:
 
 - Does it deliver on the user's stated intent?
 - Does it respect the implicit constraints you inferred or asked about?
-- Is the form (length, structure, format) appropriate?
+- Is the form (length, structure, format) appropriate for the deliverable type?
 - Is it specific and concrete, not generic?
 - Would the inferred audience actually find it useful?
-- Is anything in it that you would cut on a second read?
 
-If any check fails, revise before delivering. Do not deliver an output you would not endorse.
+Be honest about a real limitation: self-validation in the same call is less reliable than a separate validator. The MCP-server version of Lucid (the advanced install) runs a separate Validator pass with re-runs on miss. The skill version cannot. So in this skill, treat self-validation as a quality floor — catch obvious failures (missing sections, wrong audience tone, off-target length) — not as a guarantee. If a check obviously fails, revise.
 
 ## How to deliver
 
-Present the output cleanly. If you asked clarifying questions earlier, you can briefly note the spec at the top — *"For the leadership team, leading with a decision recommendation:"* — so the user sees the questions paid off. If you inferred dimensions without asking, you don't need to surface them; just produce the output.
+Present the output cleanly. If you asked clarifying questions, briefly note the spec at the top so the user sees the questions paid off:
 
-Never paraphrase or summarize your own output to the user. The fluency lift comes from the structured generation, not from explanation about it.
+> Based on this being for the leadership team and the goal being a decision on the EU launch, here's the one-pager:
 
-## Multi-turn behavior
+If you inferred dimensions without asking, don't surface them — just produce the output.
 
-If clarification was needed, the protocol naturally produces a multi-turn flow:
+Never paraphrase or summarize your own output to the user. The fluency lift comes from structured generation, not from meta-commentary about it.
 
-- Turn 1: User asks for the deliverable
-- Turn 2: You ask one or two pointed questions, framed so the user sees why
-- Turn 3: User answers
-- Turn 4: You produce the output, briefly noting the spec applied
+## Multi-turn shape
 
-This is the correct shape. Do not collapse this into a single turn by guessing at missing answers; do not over-extend it by asking too many questions in turn 2.
+If clarification was needed, the protocol naturally produces a multi-turn flow: the user asks, you ask one or two sharp questions, the user answers, you produce the output. Don't collapse this into a single turn by guessing at missing answers. Don't extend it past two clarifying questions in turn 2.
 
-## What this is *not*
+## What this skill is *not*
 
-This protocol is not a script the user reads. It is internal scaffolding for *your* generation. The user should experience: they made a request, you (sometimes) asked one sharp question, you delivered an unusually good output. That's it.
+It is not a script the user reads. It is internal scaffolding for *your* generation. The user should experience: they made a request, you sometimes asked one sharp question, you delivered an unusually good output. Nothing more.
 
-This protocol is not about being verbose. The fluency lift compresses the user's intent into structured generation; it doesn't pad the output with meta-commentary.
+It is not about being verbose. The protocol compresses intent into structured generation; it does not pad the output with meta-commentary.
+
+It is not a guarantee. It is a floor that lifts median output quality. The advanced MCP-server version of Lucid does more — separate Listener model, prompt caching, separate Validator pass, persistent memory. The skill version trades those for zero setup. Both encode the same protocol; the MCP version measures and re-runs more rigorously.
 
 ## Why this matters
 
-The user does not have to learn how to prompt. The protocol does it for them. Each application turns a vague request into a structured spec, which produces dramatically better output than the raw request would have — using the same model. The dominant constraint on AI usefulness is not capability; it is the medium between the human and the model. This protocol is the medium, made fluent.
+The user does not have to learn how to prompt. The protocol does it for them. Each application turns a vague request into a structured spec, which produces measurably better output than the raw request would have — using the same model. The dominant constraint on AI usefulness is not capability; it is the medium between the human and the model. This protocol is the medium, made fluent.

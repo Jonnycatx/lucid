@@ -22,16 +22,19 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from evals.harness import (  # noqa: E402
+    SKILL_PATH,
     CompareReport,
     EvalPrompt,
     JudgeVerdict,
     RunResult,
+    _load_skill_body,
     compare,
     judge_pair,
     load_prompts,
     render_report,
     run_baseline,
     run_lucid,
+    run_skill,
 )
 
 
@@ -122,6 +125,61 @@ def test_run_baseline_handles_api_error(doc_prompt):
     client = MagicMock()
     client.messages.create.side_effect = RuntimeError("rate limited")
     out = run_baseline(doc_prompt, client=client)
+    assert out.error is not None
+    assert "rate limited" in out.error
+
+
+def test_skill_path_exists():
+    """The standalone skill we ship for download must exist on disk."""
+    assert SKILL_PATH.exists(), f"missing skill at {SKILL_PATH}"
+
+
+def test_load_skill_body_strips_frontmatter():
+    """Loader must strip YAML frontmatter — the system prompt is body only."""
+    body = _load_skill_body()
+    assert not body.startswith("---")
+    assert "name: lucid-fluency" not in body  # frontmatter should be gone
+    # Body content is present
+    assert "Lucid Fluency Protocol" in body
+    assert "Listen" in body
+    assert "Validate" in body
+
+
+def test_run_skill_returns_stub_without_client(doc_prompt):
+    out = run_skill(doc_prompt, client=None)
+    assert out.runner == "skill"
+    assert out.error is None
+    assert out.metadata["model"] == "(stub)"
+
+
+def test_run_skill_passes_skill_body_as_system_prompt(doc_prompt):
+    """The skill body must be sent as the system prompt to the model."""
+    client = MagicMock()
+    client.messages.create.return_value = _text_response("the document body")
+    out = run_skill(doc_prompt, client=client)
+    assert out.output == "the document body"
+    assert out.error is None
+    kwargs = client.messages.create.call_args.kwargs
+    assert "system" in kwargs
+    assert "Lucid Fluency Protocol" in kwargs["system"]
+    # User message is the raw prompt — the skill body is in `system`, not user
+    assert kwargs["messages"][0]["content"] == doc_prompt.prompt
+
+
+def test_run_skill_works_for_non_document_domains(code_prompt):
+    """Unlike run_lucid (vertical-mode-only until universal Translator), the
+    skill should produce output for any domain — that's the whole point."""
+    client = MagicMock()
+    client.messages.create.return_value = _text_response("refactored code")
+    out = run_skill(code_prompt, client=client)
+    assert out.error is None
+    assert out.output == "refactored code"
+
+
+def test_run_skill_handles_api_error(doc_prompt):
+    client = MagicMock()
+    client.messages.create.side_effect = RuntimeError("rate limited")
+    out = run_skill(doc_prompt, client=client)
     assert out.error is not None
     assert "rate limited" in out.error
 

@@ -138,6 +138,69 @@ def run_baseline(
         return RunResult(prompt_id=prompt.id, runner="baseline", output="", error=str(e))
 
 
+SKILL_PATH = Path(__file__).resolve().parents[1] / "skill" / "lucid-fluency" / "SKILL.md"
+
+
+def _load_skill_body(skill_path: Path = SKILL_PATH) -> str:
+    """Load the standalone skill SKILL.md and strip the YAML frontmatter.
+
+    The skill body is what would be loaded into a Claude session as the
+    skill's instructions. We send it as a system prompt for the eval.
+    """
+    raw = skill_path.read_text()
+    # Strip the YAML frontmatter (between the first two '---' delimiters).
+    if raw.startswith("---"):
+        end = raw.find("---", 3)
+        if end != -1:
+            return raw[end + 3:].lstrip()
+    return raw
+
+
+def run_skill(
+    prompt: EvalPrompt,
+    *,
+    client: Optional["Anthropic"] = None,
+    model: str = EXECUTION_MODEL,
+    max_tokens: int = EXECUTION_MAX_TOKENS,
+    skill_path: Path = SKILL_PATH,
+) -> RunResult:
+    """Run the prompt through the standalone fluency skill.
+
+    The skill body is sent as a system prompt to the execution model. This
+    simulates what happens when a user has the skill installed in Claude
+    Desktop or Cowork and the skill activates on their request.
+
+    No clarification round-trip is performed — for the eval we measure
+    one-shot output quality. The skill version's true two-turn behavior
+    (asking for missing dimensions) cannot be measured in a one-shot eval
+    and is captured separately by manual usability testing.
+    """
+    if client is None:
+        return RunResult(
+            prompt_id=prompt.id,
+            runner="skill",
+            output=f"[stub: no client] {prompt.prompt[:80]}...",
+            metadata={"model": "(stub)"},
+        )
+    try:
+        skill_body = _load_skill_body(skill_path)
+        response = client.messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            system=skill_body,
+            messages=[{"role": "user", "content": prompt.prompt}],
+        )
+        text = "\n".join(b.text for b in response.content if getattr(b, "type", None) == "text")
+        return RunResult(
+            prompt_id=prompt.id,
+            runner="skill",
+            output=text.strip(),
+            metadata={"model": model, "skill_path": str(skill_path)},
+        )
+    except Exception as e:  # noqa: BLE001
+        return RunResult(prompt_id=prompt.id, runner="skill", output="", error=str(e))
+
+
 def run_lucid(
     prompt: EvalPrompt,
     *,
@@ -413,6 +476,7 @@ def cli_compare(args: argparse.Namespace) -> int:
         prompts = prompts[: args.limit]
 
     print(f"Loaded {len(prompts)} prompts from {prompts_path}")
+    print(f"Treatment runner: {args.runner}")
 
     client = _build_client()
     if client is None:
@@ -422,20 +486,32 @@ def cli_compare(args: argparse.Namespace) -> int:
         )
         return 1
 
+    treatment_runner = run_skill if args.runner == "skill" else run_lucid
+    runner_name = args.runner
+
     print("Running baseline...")
     baseline_runs: dict[str, RunResult] = {}
     for p in prompts:
         baseline_runs[p.id] = run_baseline(p, client=client)
-        print(f"  baseline: {p.id}")
+        if baseline_runs[p.id].error:
+            print(f"  baseline: {p.id}  [ERROR] {baseline_runs[p.id].error}")
+        else:
+            print(f"  baseline: {p.id}  ({len(baseline_runs[p.id].output)} chars)")
 
-    print("Running Lucid...")
-    lucid_runs: dict[str, RunResult] = {}
+    print(f"Running {runner_name}...")
+    treatment_runs: dict[str, RunResult] = {}
     for p in prompts:
-        lucid_runs[p.id] = run_lucid(p, client=client)
-        print(f"  lucid: {p.id}")
+        treatment_runs[p.id] = treatment_runner(p, client=client)
+        if treatment_runs[p.id].error:
+            print(f"  {runner_name}: {p.id}  [ERROR] {treatment_runs[p.id].error}")
+        else:
+            print(f"  {runner_name}: {p.id}  ({len(treatment_runs[p.id].output)} chars)")
 
     print("Judging...")
-    report = compare(prompts, baseline_runs, lucid_runs, judge_client=client)
+    # The compare() function expects a `lucid_runs` dict; pass the treatment
+    # runs in that slot. The runner name in each RunResult preserves which
+    # treatment was actually run.
+    report = compare(prompts, baseline_runs, treatment_runs, judge_client=client)
 
     print()
     print(render_report(report))
@@ -473,6 +549,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     compare_parser.add_argument("--domain", help="Restrict to a single domain (e.g. 'document').")
     compare_parser.add_argument("--limit", type=int, help="Run at most N prompts.")
     compare_parser.add_argument("--output", help="Write full results JSON to this path.")
+    compare_parser.add_argument(
+        "--runner",
+        choices=["skill", "lucid"],
+        default="skill",
+        help="Treatment runner: 'skill' (the standalone fluency skill, default) or 'lucid' (MCP server).",
+    )
     compare_parser.set_defaults(func=cli_compare)
 
     args = parser.parse_args(argv)
