@@ -45,9 +45,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jonfiorucci/lucid"
-Repository = "https://github.com/jonfiorucci/lucid"
-Issues = "https://github.com/jonfiorucci/lucid/issues"
+Homepage = "https://github.com/Jonnycatx/lucid"
+Repository = "https://github.com/Jonnycatx/lucid"
+Issues = "https://github.com/Jonnycatx/lucid/issues"
 
 [project.scripts]
 lucid = "lucid.server:main"
