@@ -9,7 +9,30 @@
 [![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)](#)
 [![MCP](https://img.shields.io/badge/MCP-server-8A2BE2.svg)](https://modelcontextprotocol.io/)
 
-One click. Open the file with Cowork. Click *Install*. Lucid is on. No Python, no API config, no command line. The plugin auto-fires on any deliverable request — documents, code, creative work, analysis — and produces dramatically better output than the same model from a raw prompt.
+**Install steps (Cowork on Mac):**
+
+1. Download `lucid.plugin` from the link above
+2. Open the Claude desktop app and switch to **Cowork**
+3. Click your profile (top-right) → **Customize**
+4. In the left panel, scroll to **Personal plugins** and click the **+** icon → **Upload local plugin**
+5. Drag the `.plugin` file into the upload zone (or click **Browse files**) and click **Upload**
+6. Confirm the trust warning. Lucid is now active.
+
+The `lucid-fluency` skill auto-fires on requests where prompt quality matters — documents, code, creative work, analysis. Or invoke explicitly with `/lucid <your request>`.
+
+**Prerequisites for Lucid to actually call models** *(one-time setup; future versions will bundle these)*:
+
+```bash
+# Install the Python package directly from this repo
+pip install git+https://github.com/Jonnycatx/lucid.git
+
+# Set your Anthropic API key in your shell config (~/.zshrc on macOS) so
+# every Terminal session — and Cowork — inherits it
+echo 'export ANTHROPIC_API_KEY=sk-ant-...' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Requires Python 3.10+. Without these steps, the plugin installs but the underlying MCP server can't reach Anthropic.
 
 ---
 
