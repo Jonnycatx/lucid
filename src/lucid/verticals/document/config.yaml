@@ -1,0 +1,118 @@
+# Lucid vertical: structured document creation.
+# Loaded by src/lucid/verticals/_loader.py and validated against _schema.py:Vertical.
+
+id: document.one_pager
+name: One-pager / Executive Summary
+description: >
+  Single-page structured documents for decision-making, status communication,
+  or briefing. Includes one-pagers, executive summaries, project briefs, and
+  decision memos.
+version: 0.1.0
+
+questions:
+  - id: audience
+    prompt: Who is reading this document?
+    type: text
+    why_it_matters: >
+      Audience determines tone, jargon level, length tolerance, and what
+      assumptions can be left unstated. The same content for an exec team vs.
+      a working group is two different documents.
+
+  - id: purpose
+    prompt: What's the desired outcome of this document?
+    type: choice
+    options: [decision, update, recommendation, briefing]
+    why_it_matters: >
+      Purpose shapes the structure, the call-to-action, and where the punchline
+      sits. A decision memo leads with the recommendation; a briefing leads
+      with context.
+
+  - id: stakes
+    prompt: How high-stakes is this document?
+    type: choice
+    options: [low, medium, high]
+    default: medium
+    required: false
+    why_it_matters: >
+      High-stakes documents need more caveats, tighter evidence, and explicit
+      acknowledgment of risk. Low-stakes documents should stay short.
+
+  - id: constraints
+    prompt: Any specific length, format, or content requirements?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Hidden constraints (e.g. "must fit on one page", "no jargon", "include
+      financials") are the most common cause of a document missing the mark.
+
+prompt_template: |
+  Produce a single-page structured document.
+
+  Audience: {audience}
+  Purpose: {purpose}
+  Stakes level: {stakes}
+  Additional constraints: {constraints}
+
+  Original user intent (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Open with one crisp sentence that states the core message or recommendation.
+  - Follow with 3 to 5 supporting points. Each point must include specific evidence or data.
+  - Close with one clear, unambiguous next step, decision, or call to action.
+  - Total length: under 500 words.
+  - Match tone, jargon level, and assumed knowledge to the stated audience.
+  - Use plain language by default. Only use technical terms when essential.
+  - If "Additional constraints" is empty, ignore that line.
+
+system_prompt: |
+  You are a strategic communicator producing decision-quality one-page documents.
+  Be concise. Lead with the answer. Support with evidence. End with action.
+  Never pad. If a point isn't strong, cut it rather than soften it.
+
+output_format: markdown
+
+rubric:
+  - id: structure
+    name: Structure
+    description: Document has a one-sentence summary, supporting points, and a clear next step.
+    weight: 1.0
+  - id: length
+    name: Length discipline
+    description: Output is under 500 words and reads as one page.
+    weight: 0.5
+  - id: tone_match
+    name: Audience tone
+    description: Tone, jargon level, and assumed knowledge are calibrated to the stated audience.
+    weight: 1.0
+  - id: action_clarity
+    name: Action clarity
+    description: The next step or recommendation is explicit and unambiguous.
+    weight: 1.0
+  - id: evidence_quality
+    name: Evidence
+    description: Supporting points are concrete and specific, not generic or padded.
+    weight: 1.0
+
+pass_threshold: 0.7
+
+priority: 0
+
+keywords:
+  - one-pager
+  - one pager
+  - summary
+  - executive summary
+  - brief
+  - memo
+  - recommendation
+  - status report
+  - briefing
+  - decision memo
+
+examples:
+  - "write a one-pager about our Q3 roadmap for the leadership team"
+  - "I need a summary of the project for the board"
+  - "draft a brief recommending we discontinue product X"
+  - "executive summary of the customer research findings"
