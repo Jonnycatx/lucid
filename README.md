@@ -1,4 +1,4 @@
-# Lucid &nbsp;·&nbsp; [Install in Cowork →](https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.plugin)
+# Lucid &nbsp;·&nbsp; [Install →](https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.skill)
 
 > The fluency layer between human intent and AI output.
 
@@ -6,41 +6,20 @@
 [![CI](https://github.com/Jonnycatx/lucid/actions/workflows/ci.yml/badge.svg)](https://github.com/Jonnycatx/lucid/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)](#)
+[![Version](https://img.shields.io/badge/version-0.2.0-orange.svg)](#)
 [![MCP](https://img.shields.io/badge/MCP-server-8A2BE2.svg)](https://modelcontextprotocol.io/)
 
-**Install steps (Cowork on Mac):**
+**One click. Zero setup.** Download `lucid.skill` (the link above), open it with Claude Desktop or Cowork, click *Save skill*. Lucid is on. No Python, no API key, no command line. Lucid uses your existing Claude session — nothing extra to configure.
 
-1. Download `lucid.plugin` from the link above
-2. Open the Claude desktop app and switch to **Cowork**
-3. Click your profile (top-right) → **Customize**
-4. In the left panel, scroll to **Personal plugins** and click the **+** icon → **Upload local plugin**
-5. Drag the `.plugin` file into the upload zone (or click **Browse files**) and click **Upload**
-6. Confirm the trust warning. Lucid is now active.
-
-The `lucid-fluency` skill auto-fires on requests where prompt quality matters — documents, code, creative work, analysis. Or invoke explicitly with `/lucid <your request>`.
-
-**Prerequisites for Lucid to actually call models** *(one-time setup; future versions will bundle these)*:
-
-```bash
-# Install the Python package directly from this repo
-pip install git+https://github.com/Jonnycatx/lucid.git
-
-# Set your Anthropic API key in your shell config (~/.zshrc on macOS) so
-# every Terminal session — and Cowork — inherits it
-echo 'export ANTHROPIC_API_KEY=sk-ant-...' >> ~/.zshrc
-source ~/.zshrc
-```
-
-Requires Python 3.10+. Without these steps, the plugin installs but the underlying MCP server can't reach Anthropic.
+The skill auto-fires on requests where prompt quality matters — documents, code, creative work, analysis. It listens for your true intent, asks one or two clarifying questions if anything required is missing, then produces dramatically better output than a raw prompt would.
 
 ---
 
 ## What's in Lucid
 
-- **One-click Cowork plugin** — [download lucid.plugin](https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.plugin) and install. Auto-trigger skill fires on any deliverable. No setup needed.
-- **MCP server** — works in Claude Desktop, Cursor, Zed, or any Model Context Protocol client. Drop into your existing AI workflow.
-- **Universal fluency pipeline** — Listener → Translator → Validator → Memory. Designed to work across any intent type, any domain, any modality.
+- **One-click skill install** — [download lucid.skill](https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.skill) and open. Zero setup. Uses your existing Claude session, no API key needed. *This is the recommended path for almost everyone.*
+- **MCP server (advanced)** — for developers and power users who want fine-grained control: separate Listener / Translator / Validator model selection, prompt caching, multi-turn orchestration. Install via [lucid.plugin](https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.plugin) (Cowork) or `pip install` for direct Claude Desktop config. Requires Python 3.10+ and an Anthropic API key.
+- **Universal fluency protocol** — Listen, Clarify, Translate, Validate. Same protocol whether you install the skill or run the MCP server.
 - **Eval-gated quality** — 30-prompt eval set with position-debiased LLM-as-judge measures Lucid's win rate against the same model with a raw prompt. Every release has to clear the bar.
 - **Open source, auditable** — every line of code, every prompt, every test, every thesis document lives in this repo. MIT-licensed. Built with Claude, in the open.
 
@@ -129,10 +108,9 @@ Add Lucid to Claude Desktop's `claude_desktop_config.json`:
 
 | Milestone | State |
 |---|---|
+| Standalone fluency skill (zero-setup install) | Done |
 | Vertical schema and first vertical | Done |
-| Listener (intent extraction via Haiku) | Done |
-| Translator (template + Sonnet 4.6) | Done |
-| End-to-end pipeline with multi-turn clarification | Done |
+| Listener / Translator / pipeline (MCP server, multi-turn clarification) | Done |
 | Cowork plugin packaging | Done |
 | Eval harness (30 prompts, position-debiased LLM judge) | Done |
 | Phase 2 closure: measured win rate vs. baseline | In progress |
@@ -150,7 +128,9 @@ lucid/
 ├── LICENSE
 ├── CONTRIBUTING.md
 ├── docs/                          # thesis and build plan
-├── plugin/                        # Cowork plugin (manifest, skill, command)
+├── skill/                         # Standalone fluency skill (zero-setup install)
+│   └── lucid-fluency/SKILL.md
+├── plugin/                        # Cowork plugin (manifest, skill, command, MCP)
 ├── evals/                         # 30-prompt eval set + LLM-as-judge harness
 ├── src/lucid/
 │   ├── server.py                  # FastMCP entry, lucid_run tool
