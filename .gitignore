@@ -40,6 +40,7 @@ evals/results/*
 # IDEs
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 *~

@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lucid — the fluency layer between human intent and AI output</title>
+<meta name="description" content="The dominant constraint on AI output quality is not model capability. It is the loss of fidelity between human intent and model input. Lucid closes that channel." />
+<meta property="og:title" content="Lucid — the fluency layer between human intent and AI output" />
+<meta property="og:description" content="See the same prompt, same model — with and without Lucid. Side-by-side." />
+<meta property="og:type" content="website" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #07070a;
+    --fg: #f4ede1;
+    --muted: rgba(244, 237, 225, 0.55);
+    --dim: rgba(244, 237, 225, 0.32);
+    --accent: #d97757;
+    --raw-bg: rgba(244, 237, 225, 0.03);
+    --lucid-bg: rgba(217, 119, 87, 0.05);
+    --border: rgba(244, 237, 225, 0.10);
+    --border-accent: rgba(217, 119, 87, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.55;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(244, 237, 225, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(244, 237, 225, 0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow {
+    position: fixed;
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1200px;
+    height: 700px;
+    background: radial-gradient(closest-side, rgba(217, 119, 87, 0.10), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 48px 120px;
+  }
+
+  /* ----- Top bar ----- */
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    margin-bottom: 80px;
+  }
+
+  .topbar .built {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .topbar .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .topbar nav a {
+    margin-left: 28px;
+    color: var(--muted);
+  }
+
+  .topbar nav a:hover { color: var(--fg); text-decoration: none; }
+
+  /* ----- Hero ----- */
+
+  .hero {
+    text-align: center;
+    margin-bottom: 96px;
+  }
+
+  .brand-mark {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 180px;
+    letter-spacing: 0.05em;
+    line-height: 0.9;
+    margin: 0 0 48px;
+  }
+
+  .accent-line {
+    display: block;
+    width: 60px;
+    height: 1.5px;
+    background: var(--accent);
+    margin: 0 auto 40px;
+  }
+
+  .tagline {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 28px;
+    line-height: 1.5;
+    font-style: italic;
+    max-width: 880px;
+    margin: 0 auto 32px;
+    color: rgba(244, 237, 225, 0.92);
+  }
+
+  .punchline {
+    font-size: 14px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 56px;
+  }
+
+  .cta {
+    display: inline-flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 14px 28px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--fg);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .btn:hover { text-decoration: none; transform: translateY(-1px); }
+
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn.primary:hover { background: #c9684a; border-color: #c9684a; }
+
+  .btn.secondary { background: transparent; }
+  .btn.secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ----- Section heading ----- */
+
+  .section-eyebrow {
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 48px;
+    line-height: 1.15;
+    text-align: center;
+    margin: 0 auto 16px;
+    max-width: 800px;
+  }
+
+  .section-sub {
+    text-align: center;
+    color: var(--muted);
+    max-width: 680px;
+    margin: 0 auto 56px;
+    font-size: 17px;
+  }
+
+  /* ----- Demo selector ----- */
+
+  .demo-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 48px;
+  }
+
+  .demo-pill {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .demo-pill:hover { color: var(--fg); border-color: var(--border-accent); }
+
+  .demo-pill.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  /* ----- Demo content ----- */
+
+  .demo {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(244, 237, 225, 0.015);
+  }
+
+  .demo-prompt {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .demo-prompt .label {
+    flex-shrink: 0;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--dim);
+    padding-top: 4px;
+    width: 88px;
+  }
+
+  .demo-prompt .text {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px;
+    color: var(--fg);
+    line-height: 1.6;
+  }
+
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .demo-col { padding: 28px 32px; min-width: 0; }
+
+  .demo-col.raw { background: var(--raw-bg); border-right: 1px solid var(--border); }
+
+  .demo-col.lucid { background: var(--lucid-bg); }
+
+  .demo-col h3 {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+    font-weight: 500;
+  }
+
+  .demo-col.raw h3 { color: var(--muted); }
+  .demo-col.lucid h3 { color: var(--accent); }
+
+  .demo-col .source {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 24px;
+  }
+
+  .output {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(244, 237, 225, 0.88);
+  }
+
+  .output p { margin: 0 0 14px; }
+  .output p:last-child { margin-bottom: 0; }
+  .output strong { color: var(--fg); font-weight: 600; }
+  .output ul, .output ol { padding-left: 22px; margin: 0 0 14px; }
+  .output li { margin-bottom: 6px; }
+  .output h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    margin: 0 0 12px;
+    color: var(--fg);
+  }
+  .output code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12.5px;
+    background: rgba(244, 237, 225, 0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .output pre {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 0 0 14px;
+  }
+  .output pre code {
+    background: none;
+    padding: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--fg);
+  }
+
+  .demo-meta {
+    border-top: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .demo-meta .vertical {
+    color: var(--muted);
+  }
+
+  .demo-meta .vertical code {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 12px;
+  }
+
+  .demo-meta .nav-arrows {
+    display: inline-flex;
+    gap: 8px;
+  }
+
+  .demo-meta .nav-arrows button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .demo-meta .nav-arrows button:hover {
+    color: var(--fg);
+    border-color: var(--accent);
+  }
+
+  /* ----- How it works ----- */
+
+  .how {
+    margin-top: 120px;
+    padding: 64px 56px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(244, 237, 225, 0.015);
+  }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    margin-top: 40px;
+  }
+
+  .how-step .num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .how-step h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+
+  .how-step p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ----- Install ----- */
+
+  .install {
+    margin-top: 120px;
+    text-align: center;
+  }
+
+  .install-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 48px;
+    max-width: 920px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .install-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 32px;
+    text-align: left;
+    background: rgba(244, 237, 225, 0.015);
+    transition: border-color 0.2s;
+  }
+
+  .install-card:hover { border-color: var(--border-accent); }
+
+  .install-card .badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  .install-card h4 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    margin: 0 0 12px;
+    line-height: 1.2;
+  }
+
+  .install-card p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+
+  /* ----- Footer ----- */
+
+  footer {
+    margin-top: 120px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--dim);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--fg); }
+
+  /* ----- Responsive ----- */
+
+  @media (max-width: 880px) {
+    main { padding: 48px 24px 80px; }
+    .topbar { flex-direction: column; gap: 16px; align-items: flex-start; margin-bottom: 56px; }
+    .topbar nav a { margin-left: 0; margin-right: 20px; }
+    .brand-mark { font-size: 96px; }
+    .tagline { font-size: 20px; }
+    .section-title { font-size: 32px; }
+    .demo-grid { grid-template-columns: 1fr; }
+    .demo-col.raw { border-right: none; border-bottom: 1px solid var(--border); }
+    .how { padding: 40px 28px; }
+    .how-grid { grid-template-columns: 1fr; gap: 24px; }
+    .install-options { grid-template-columns: 1fr; }
+    .demo-prompt { flex-direction: column; gap: 6px; }
+    .demo-prompt .label { width: auto; padding-top: 0; }
+    footer { flex-direction: column; gap: 12px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow"></div>
+
+<main>
+
+  <header class="topbar">
+    <span>Lucid · v0.2 alpha</span>
+    <nav>
+      <a href="https://github.com/Jonnycatx/lucid">GitHub</a>
+      <a href="https://github.com/Jonnycatx/lucid/blob/main/docs/thesis.md">Thesis</a>
+      <a href="https://github.com/Jonnycatx/lucid/tree/main/evals">Evals</a>
+      <a href="https://github.com/Jonnycatx/lucid/blob/main/docs/authoring-a-vertical.md">Contribute</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1 class="brand-mark">LUCID</h1>
+    <span class="accent-line"></span>
+    <p class="tagline">
+      “The dominant constraint on real-world AI usefulness is not model capability.
+      It is the loss of fidelity in the channel between the human and the model.
+      Lucid closes that channel.”
+    </p>
+    <div class="punchline">Capability is a race &nbsp;·&nbsp; Fluency is a moat</div>
+    <div class="cta">
+      <a href="https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.skill" class="btn primary">Install the skill</a>
+      <a href="https://github.com/Jonnycatx/lucid" class="btn secondary">Star on GitHub</a>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-eyebrow">See it</div>
+    <h2 class="section-title">Same prompt. Same model. With Lucid and without.</h2>
+    <p class="section-sub">
+      Real prompts from the eval set. The raw column shows what Sonnet 4.6 produces from the prompt as-typed. The Lucid column shows what the same model produces when Lucid shapes the input. Pick a domain.
+    </p>
+
+    <div class="demo-selector" id="demo-selector"></div>
+    <div class="demo" id="demo"></div>
+
+    <p style="text-align:center; color: var(--dim); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; margin-top: 24px;">
+      Outputs are illustrative of structural difference · Measured win rate ships with v0.3 · See <a href="https://github.com/Jonnycatx/lucid/tree/main/evals">/evals</a>
+    </p>
+  </section>
+
+  <section class="how">
+    <div class="section-eyebrow">How it works</div>
+    <h2 class="section-title" style="font-size: 36px;">Listen, clarify, translate, validate.</h2>
+    <p class="section-sub" style="margin-bottom: 0;">
+      Four steps between your request and the model. The protocol stays the same whether you install the skill or run the MCP server.
+    </p>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="num">1</div>
+        <h4>Listen</h4>
+        <p>Extract true intent — including unspoken constraints — from the user's request. Audience, purpose, form, hidden requirements.</p>
+      </div>
+      <div class="how-step">
+        <div class="num">2</div>
+        <h4>Clarify</h4>
+        <p>Ask one or two pointed questions when an answer would change the output by 50%+. Never interrogate.</p>
+      </div>
+      <div class="how-step">
+        <div class="num">3</div>
+        <h4>Translate</h4>
+        <p>Convert intent into the prompt shape the model performs best on. Lead with what serves the form.</p>
+      </div>
+      <div class="how-step">
+        <div class="num">4</div>
+        <h4>Validate</h4>
+        <p>Grade output against intent and re-run on miss. Self-validation in the skill, separate validator pass in the MCP server.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="install">
+    <div class="section-eyebrow">Install</div>
+    <h2 class="section-title">One click for users. Five minutes for developers.</h2>
+    <div class="install-options">
+      <div class="install-card">
+        <span class="badge">Recommended · Zero setup</span>
+        <h4>The skill</h4>
+        <p>Download <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(244,237,225,0.06); padding: 1px 5px; border-radius: 3px;">lucid.skill</code> and open it with Claude Desktop or Cowork. Click Save. The skill auto-fires on requests where prompt quality matters. No Python, no API key, no command line.</p>
+        <a class="btn primary" href="https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.skill">Download lucid.skill →</a>
+      </div>
+      <div class="install-card">
+        <span class="badge">Advanced · MCP server</span>
+        <h4>The plugin</h4>
+        <p>Full pipeline: separate Listener and Translator models, prompt caching, multi-turn orchestration. Install via Cowork plugin or pip install for direct Claude Desktop config. Requires Python 3.10+ and an Anthropic API key.</p>
+        <a class="btn secondary" href="https://github.com/Jonnycatx/lucid#for-developers-and-other-mcp-clients">Setup guide →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>github.com/Jonnycatx/lucid · MIT</span>
+    <span>An MCP server that listens, translates, validates, remembers.</span>
+  </footer>
+
+</main>
+
+<script>
+const DEMOS = [
+  {
+    id: "doc",
+    label: "Document",
+    vertical: "document.one_pager",
+    prompt: "I need something for the sales kickoff about our new pricing tiers. Make it punchy and under 400 words. The CRO hates slides so this has to stand alone.",
+    raw: `<h4>New Pricing Tiers — Sales Kickoff</h4>
+<p>We are excited to introduce our new pricing tiers, designed to better meet the needs of our customers and drive growth across our customer base.</p>
+<p><strong>Overview of Changes</strong></p>
+<p>Our new tiered pricing structure offers more flexibility for our customers and provides clearer value propositions across all segments. The new structure aligns with our strategic goals and reflects feedback from our sales team and customers.</p>
+<p><strong>Key Benefits</strong></p>
+<ul>
+  <li>Better alignment with customer needs</li>
+  <li>Clearer value propositions</li>
+  <li>Increased flexibility for sales conversations</li>
+  <li>Stronger competitive positioning</li>
+</ul>
+<p>We believe these changes will drive meaningful growth in the coming quarters and position us well in the market.</p>`,
+    lucid: `<h4>New pricing — what to say in deals next week</h4>
+<p><strong>The change in one line:</strong> Three tiers replace the old per-seat model. Starter is up 8%, Pro is flat, Enterprise gains usage caps that protect margin on the long tail.</p>
+<p><strong>What you say in deal X:</strong></p>
+<ul>
+  <li><strong>SMB &lt; 50 seats →</strong> lead with Starter. The 8% bump is below the 12% in last year's renewal cohort, so don't preempt it.</li>
+  <li><strong>Mid-market →</strong> Pro is unchanged. Use this hour to revisit any deal that was waiting on pricing.</li>
+  <li><strong>Enterprise →</strong> the new caps are a feature: predictable spend. The 4 deals stuck on procurement signal-to-noise close cleaner now.</li>
+</ul>
+<p><strong>What's at stake this quarter:</strong> ~$2.4M in pipeline is flagged "pricing review." 70% of it should close on the Pro tier with no concession. The other 30% needs the Enterprise framing above — not a discount.</p>
+<p><strong>Ask:</strong> hit me on Slack with one deal you think breaks under the new model. I'll loop in finance the same day.</p>`
+  },
+  {
+    id: "creative",
+    label: "Creative",
+    vertical: "creative.story",
+    prompt: "Write a short story about a high-stakes heist told from the perspective of a character who is clearly misinterpreting the actions of their teammates. Use sensory details to show the 'truth' while the narrator's internal monologue explains it away as something else.",
+    raw: `<p>Here is a short story for you:</p>
+<p><strong>The Heist</strong></p>
+<p>Mark thought everything was going according to plan as he watched his teammates work. Sarah was at the safe, her hands moving quickly, and Tom was watching the door. Mark felt confident. They had practiced this a hundred times.</p>
+<p>But Sarah was acting strange. She kept whispering to Tom, and Tom would nod and look at his watch. Mark assumed they were just going over the timing. Everyone was nervous, after all.</p>
+<p>When Sarah finally got the safe open, Mark expected her to start loading the bag. Instead, she pulled out a folder and handed it to Tom. "This is what we came for," she said. Mark thought she meant the money was inside the folder.</p>
+<p>The truth, of course, was that Sarah and Tom were betraying him — they had come for the documents all along, and the heist was just a cover. But Mark would not realize this until much later.</p>`,
+    lucid: `<p>The vault hinge sighs and Sarah's hand goes still on the dial — three beats, four — and I think <em>she's letting it drop, the way we drilled it</em>.</p>
+<p>Tom's eyes are on the door but his weight is wrong. Back foot. Like he's about to pivot. <em>He's tense. He's been tense since the van. Good. Tense means awake.</em></p>
+<p>Sarah pulls the cold inner drawer — I hear the friction, smell the dry vault air, the particular almond bitterness of old banknote paper — and her wrist twitches once toward Tom. <em>Confirming the count. We always confirm the count.</em></p>
+<p>The folder. She's lifting a folder. Manila, taped shut, no bank stamp.</p>
+<p><em>It's bearer bonds. They wrap them in folders sometimes. I read about that.</em></p>
+<p>Tom takes the folder. Not the cash bag. The folder. He slides it inside his jacket against his ribs and his hand stays there a beat too long, like he's holding a wound closed.</p>
+<p><em>He's checking it sits flat for the run. Smart. Always smart, Tom.</em></p>
+<p>Sarah's eyes find mine across the marble.</p>
+<p>"Mark," she says, and her voice is so soft it sounds like an apology, <em>which it isn't, it's the calm before the run, the calm she always gets,</em></p>
+<p>"do you remember the way out?"</p>
+<p><em>Of course I do. Of course I remember.</em></p>`
+  },
+  {
+    id: "code",
+    label: "Code",
+    vertical: "code.review",
+    prompt: `Review the following Python code snippet. Refactor it for maximum readability and performance. Explain why you made each change, focusing on Big O notation improvements.
+
+def find_dupes(items):
+    dupes = []
+    for i in range(len(items)):
+        for j in range(len(items)):
+            if i != j and items[i] == items[j] and items[i] not in dupes:
+                dupes.append(items[i])
+    return dupes`,
+    raw: `<p>This code finds duplicate elements in a list. Here is an improved version:</p>
+<pre><code>def find_dupes(items):
+    seen = set()
+    dupes = set()
+    for item in items:
+        if item in seen:
+            dupes.add(item)
+        seen.add(item)
+    return list(dupes)</code></pre>
+<p><strong>Changes I made:</strong></p>
+<ul>
+  <li>I changed the algorithm to use sets instead of nested loops, which improves performance.</li>
+  <li>The original code was O(n³) because of the nested loops and the <code>in dupes</code> check, which is also O(n).</li>
+  <li>The new code is O(n) on average because set operations are O(1).</li>
+  <li>I also made the code more readable by using more descriptive variable names and removing the index-based iteration.</li>
+</ul>
+<p>The new version should be much faster on large inputs.</p>`,
+    lucid: `<pre><code>def find_dupes(items):
+    seen, dupes = set(), set()
+    for item in items:
+        if item in seen:
+            dupes.add(item)
+        else:
+            seen.add(item)
+    return list(dupes)</code></pre>
+<p><strong>1. Iterate by value, not by index.</strong> The original walks <code>range(len(items))</code> twice and reads <code>items[i]</code> / <code>items[j]</code>. Iterating <code>for item in items</code> is the Pythonic shape and removes a class of off-by-one bugs.</p>
+<p><strong>2. Replace the nested loop with a single pass + a hash set.</strong> The inner loop's job was "have I seen this before?" — that's exactly what <code>x in seen</code> answers in O(1). The pair of loops drops from O(n²) to O(n).</p>
+<p><strong>3. Replace <code>items[i] not in dupes</code> with a set.</strong> The original used a list for <code>dupes</code>, so <code>not in dupes</code> was an O(k) scan inside the inner loop — making the whole function O(n³) in the worst case where every element is unique. Storing dupes in a set drops that to O(1) per check.</p>
+<p><strong>Net:</strong> O(n³) → O(n). On a list of 10,000 items, the original does up to ~10¹² comparisons; the rewrite does ~10⁴.</p>
+<p><strong>Behavior preserved:</strong> input order of duplicates is not preserved by either version (the original used append-on-first-discovery; this version uses a set). If preserving first-discovery order matters, swap the dupes set for a dict and use <code>dupes[item] = None</code>; <code>list(dupes)</code> then returns insertion order.</p>`
+  },
+  {
+    id: "roleplay",
+    label: "Roleplay",
+    vertical: "creative.story",
+    prompt: "I am entering a tavern called 'The Rusty Spoke.' Describe the atmosphere, the three most suspicious NPCs currently at the bar, and one subtle detail that suggests the tavern is actually a front for a secret society.",
+    raw: `<p><strong>The Rusty Spoke Tavern</strong></p>
+<p>You enter the Rusty Spoke. The tavern is dimly lit and smells of ale and smoke. A fire crackles in the hearth and patrons murmur in low voices. The bartender, a gruff older man, polishes a mug behind the bar.</p>
+<p><strong>Three suspicious NPCs:</strong></p>
+<ol>
+  <li><strong>The Hooded Stranger</strong> — sits alone in the corner, face hidden. He nurses a drink and watches the door.</li>
+  <li><strong>The Loud Merchant</strong> — laughs too loudly and seems to be trying to draw attention to himself, perhaps as a distraction.</li>
+  <li><strong>The Quiet Woman</strong> — sits at the bar with a sealed letter, glancing nervously at the door.</li>
+</ol>
+<p><strong>Subtle detail:</strong> Above the bar hangs a wagon wheel with seven spokes, and one of the spokes is polished while the others are dull and rusted. This may be a sign for those who know what to look for.</p>`,
+    lucid: `<p>You push the door and the smell hits first — wet pine, cold iron, and something underneath that, sweeter, like burnt sugar. The hearth is small and badly tended. Two of the lanterns above the bar are unlit.</p>
+<p>Three at the bar:</p>
+<p><strong>A wheelwright</strong> — leather apron, hands resting palm-up on the counter, fingernails clean. A wheelwright's hands aren't clean. He hasn't touched the cider in front of him; the foam has fallen.</p>
+<p><strong>A Mistress in green</strong> — laughing too easily at something the man beside her isn't saying. Her cup is empty but she lifts it to drink twice while you watch. The second time she catches your eye over the rim and her smile doesn't change.</p>
+<p><strong>A boy, maybe twelve</strong> — too young for the bar, no one stopping him. He's drawing a circle on the wood with a wet finger, over and over. The same circle. When the door behind you closes he stops, listens, and starts again.</p>
+<p>And: every empty stool at the bar has been pushed in. Every one. In a tavern at this hour, that takes someone's hand, and recently.</p>`
+  }
+];
+
+let currentDemo = 0;
+
+function renderSelector() {
+  const sel = document.getElementById('demo-selector');
+  sel.innerHTML = DEMOS.map((d, i) =>
+    `<button class="demo-pill ${i === currentDemo ? 'active' : ''}" data-i="${i}">${d.label}</button>`
+  ).join('');
+  sel.querySelectorAll('.demo-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentDemo = parseInt(btn.dataset.i);
+      renderSelector();
+      renderDemo();
+    });
+  });
+}
+
+function renderDemo() {
+  const d = DEMOS[currentDemo];
+  const el = document.getElementById('demo');
+  el.innerHTML = `
+    <div class="demo-prompt">
+      <span class="label">Prompt</span>
+      <span class="text">${escapeHtml(d.prompt)}</span>
+    </div>
+    <div class="demo-grid">
+      <div class="demo-col raw">
+        <h3>Raw</h3>
+        <div class="source">Sonnet 4.6 · prompt as-typed</div>
+        <div class="output">${d.raw}</div>
+      </div>
+      <div class="demo-col lucid">
+        <h3>Lucid</h3>
+        <div class="source">Sonnet 4.6 · same prompt, shaped</div>
+        <div class="output">${d.lucid}</div>
+      </div>
+    </div>
+    <div class="demo-meta">
+      <span class="vertical">Vertical: <code>${d.vertical}</code></span>
+      <span class="nav-arrows">
+        <button id="prev" aria-label="Previous">←</button>
+        <button id="next" aria-label="Next">→</button>
+      </span>
+    </div>
+  `;
+  document.getElementById('prev').addEventListener('click', () => {
+    currentDemo = (currentDemo - 1 + DEMOS.length) % DEMOS.length;
+    renderSelector();
+    renderDemo();
+  });
+  document.getElementById('next').addEventListener('click', () => {
+    currentDemo = (currentDemo + 1) % DEMOS.length;
+    renderSelector();
+    renderDemo();
+  });
+}
+
+function escapeHtml(s) {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+renderSelector();
+renderDemo();
+</script>
+
+</body>
+</html>
