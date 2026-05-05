@@ -31,8 +31,16 @@ class VerticalLoadError(Exception):
 
 
 def _iter_vertical_config_paths() -> list[Path]:
-    """Find every config.yaml under the verticals directory."""
-    return sorted(VERTICALS_DIR.glob(f"*/{CONFIG_FILENAME}"))
+    """Find every config.yaml under the verticals directory.
+
+    Directories whose name starts with `_` are skipped. Convention for
+    template scaffolds (`_template/`) and shared fragments — they exist
+    on disk for contributors but never load as real verticals.
+    """
+    return sorted(
+        p for p in VERTICALS_DIR.glob(f"*/{CONFIG_FILENAME}")
+        if not p.parent.name.startswith("_")
+    )
 
 
 def load_vertical(config_path: Path) -> Vertical:

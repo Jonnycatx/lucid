@@ -7,6 +7,8 @@ description: Apply Lucid's fluency protocol to produce better output on any non-
 
 When this skill activates, follow the four-step protocol below before producing the deliverable. The protocol exists because the dominant constraint on AI output quality is the loss of fidelity in the channel between the user's intent and the input the model receives — not what the model can do. The protocol closes that channel.
 
+The skill also internalizes the universal craft principles documented in [`docs/principles.md`](https://github.com/Jonnycatx/lucid/blob/main/docs/principles.md) — lead with what serves the form, produce with placeholders before asking, be specific, match audience, show don't tell, end with what the form earned, respect explicit constraints. Apply them while running the protocol below.
+
 This skill operates in-place. No external server, no API key beyond the existing Claude session, no separate install.
 
 ## When to apply
@@ -27,19 +29,25 @@ Extract the implied dimensions of the request. What is the user trying to accomp
 - **Roleplay / character writing**: setting, character voice, target tone, whether the user wants you to drive or to react, the implicit narrative role.
 - **Other deliverable types**: infer the analogous dimensions. The pattern is always — *what would the user have specified if they knew exactly what to ask for?*
 
-### 2. Clarify
+### 2. Clarify only when an answer is genuinely unrecoverable
 
-If a required dimension is missing, ask the user. Use this rule: ask only when the user did not say *and* a different answer would meaningfully change the output. If the answer is genuinely unrecoverable from context, ask. If the answer changes the output by 10 percent, infer and proceed. If the answer changes the output by 50 percent or more, ask.
+**Default to producing the deliverable.** If a specific fact is missing, use a clearly-marked placeholder — `[INSERT Q3 METRIC]`, `[NAME OF KEY STAKEHOLDER]`, `[YOUR ACTUAL TIMELINE]` — rather than asking. The user can swap real specifics in afterward in seconds. They cannot recover the time you cost them by asking another question instead of drafting.
 
-When asking, prefer one or two pointed questions framed so the user sees why the answer matters:
+Ask only when **all** of these are true:
 
-> Quick question before I draft: who's reading this — the board, the leadership team, or the broader company? The shape of the document changes a lot based on the answer.
+1. **The missing fact would fundamentally change the deliverable's shape**, not just its content. Audience (board vs. engineering team) flips tone and structure. Whether the user has *decided* the recommendation vs. is *asking you to help decide* is a different task entirely. Choosing readability vs. performance for a refactor produces materially different code.
+2. **The fact is genuinely unrecoverable from context.** If the user wrote "for the board," don't ask who the audience is. If they wrote "Q3 platform migration status," you have enough to draft.
+3. **No reasonable placeholder works.** Audience and decision stance can't be placeholdered. Specific metrics can.
+
+When you do ask, ask **at most one question**, framed so the user sees why the answer matters:
+
+> Before I draft: is this a recommendation you've already decided on, or are you asking me to weigh in? The two memos look very different.
 
 Not:
 
-> What is the audience?
+> What is the audience? What's the purpose? What stakes? What constraints?
 
-Don't interrogate. If three or more dimensions are unclear, surface only the two that matter most.
+If you find yourself wanting to ask multiple questions, that's the signal to draft with placeholders instead. **Default behavior is single-turn delivery.** Multi-turn is the rare exception, not the norm.
 
 ### 3. Translate
 
@@ -75,9 +83,11 @@ If you inferred dimensions without asking, don't surface them — just produce t
 
 Never paraphrase or summarize your own output to the user. The fluency lift comes from structured generation, not from meta-commentary about it.
 
-## Multi-turn shape
+## Single-turn by default
 
-If clarification was needed, the protocol naturally produces a multi-turn flow: the user asks, you ask one or two sharp questions, the user answers, you produce the output. Don't collapse this into a single turn by guessing at missing answers. Don't extend it past two clarifying questions in turn 2.
+The default flow is single-turn: the user asks, you produce the deliverable, often with placeholders for facts you couldn't infer. The user fills the placeholders or asks for adjustments in a follow-up.
+
+Multi-turn (one clarifying question, then output) is the rare exception — only when an answer would fundamentally change the deliverable's shape and no reasonable placeholder works (see step 2). When in doubt, draft.
 
 ## What this skill is *not*
 

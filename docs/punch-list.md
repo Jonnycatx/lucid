@@ -12,7 +12,9 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 1. The skill clarifies too aggressively for one-shot use cases.
 2. When the skill commits to producing output, it wins for the right structural reasons (specificity, concrete numbers, narrative voice).
 
-### 1. Skill body clarification fix · **NEXT**
+### 1. Skill body clarification fix · **DONE**
+
+*Completed 2026-05-05 · this commit · Skill now defaults to producing-with-placeholders; multi-turn is the rare exception, not the norm. Synced standalone and plugin skill bodies.*
 
 **What.** Edit [`skill/lucid-fluency/SKILL.md`](../skill/lucid-fluency/SKILL.md) to bias toward producing-with-placeholders over asking, and tighten the "when to ask" rule to genuinely-unrecoverable cases (audience flips that change tone fundamentally; decisions the user hasn't actually made). Add explicit guidance: when concrete facts are missing but the form is clear, produce a draft using `[INSERT METRIC]`-style placeholders and close with "want me to swap in real specifics?"
 
@@ -20,7 +22,9 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 
 **Effort.** ~30 min · no API cost.
 
-### 2. `docs/principles.md` — canonical craft rules · **NEXT**
+### 2. `docs/principles.md` — canonical craft rules · **DONE**
+
+*Completed 2026-05-05 · this commit · Seven numbered principles extracted from the skill body and shipped verticals: lead with form, produce with placeholders, be specific, match audience, show don't tell, end with what the form earned, respect explicit constraints. Skill body now references this file.*
 
 **What.** Single file with 5–7 numbered universal principles extracted from the (corrected) skill body and the four shipped verticals: lead with what serves the form; produce with placeholders before asking; cut padding ruthlessly; match tone to audience; never meta-comment on the output; end on resonance not summary; respect explicit constraints exactly.
 
@@ -28,7 +32,9 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 
 **Effort.** ~30 min · no API cost.
 
-### 3. Vertical template scaffold · **NEXT**
+### 3. Vertical template scaffold · **DONE**
+
+*Completed 2026-05-05 · this commit · Created `src/lucid/verticals/_template/config.yaml` — fully commented YAML with TODO markers and inline notes. Loader updated to skip underscore-prefixed directories so the template never loads as a real vertical. Test added (`test_underscore_prefixed_directories_are_skipped`).*
 
 **What.** A fully-commented `src/lucid/verticals/_template/config.yaml` (excluded from the registry by an underscore prefix the loader skips) with TODO placeholders explaining each field. Contributors copy this when adding a new vertical, rather than copying a real vertical and editing.
 
@@ -36,7 +42,9 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 
 **Effort.** ~20 min · no API cost.
 
-### 4. Wire the references · **NEXT**
+### 4. Wire the references · **DONE**
+
+*Completed 2026-05-05 · this commit · Skill body links to principles.md. Authoring guide now points at the template (not real verticals) for the copy step and references principles.md for the system_prompt step. Vertical system_prompts NOT yet refactored to compose from principles.md — that work remains in punch-list item #23 (deferred).*
 
 **What.** Update `skill/SKILL.md`, the four vertical `system_prompt` blocks, and `docs/authoring-a-vertical.md` to reference `principles.md` and `_template/` instead of restating rules or pointing at real verticals.
 
@@ -56,7 +64,7 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 
 **Effort.** ~1 hr · no API cost to build (test mocked).
 
-### 6. n=3 smoke re-run · **PARKED (after Tier 1)**
+### 6. n=3 smoke re-run · **NEXT** *(Tier 1 dependency cleared)*
 
 **What.** `python -m evals.harness compare --limit 3 --runner skill` after Tier 1 lands. Confirms the clarification issue is gone before any larger spend.
 
@@ -197,6 +205,16 @@ Once `principles.md` exists, vertical `system_prompt` blocks should compose from
 ### 24. Validator: live grading on a real prompt
 The Validator (Phase 4) is built but only smoke-tested. Run it on real eval prompts to confirm it produces sensible scores and the re-roll budget improves outputs.
 
+### 25. Shared question library — `inherits_questions` schema field
+
+**What.** Extract truly-common Listener questions (`audience`, `constraints`) into a shared YAML library (`src/lucid/verticals/_common.yaml`). Add an `inherits_questions: [audience, constraints]` field to the vertical schema. The loader merges inherited + local questions at registry-build time. Each vertical's YAML drops the duplicated definitions.
+
+**Efficiency case.** Today `audience` is defined in 3+ verticals nearly identically; `constraints` in all 4. As verticals grow, this duplication grows linearly. Centralizing means a single edit propagates. Trigger conditions for promoting this to NEXT: (a) 8+ verticals exist, OR (b) 3+ truly-identical questions appear across all verticals, OR (c) a contributor PR demonstrates real duplication pain.
+
+**Why not now.** With 4 verticals and only 2 nearly-shared questions, the abstraction overhead (new schema field, loader merge logic, migration) outweighs the DRY win. Each vertical's `why_it_matters` text is also slightly tuned per-domain — centralizing would lose that. Wait for the trigger conditions.
+
+**Effort when triggered.** ~2 hr · no API cost.
+
 ---
 
 ## How to use this list
@@ -220,6 +238,6 @@ The list is only useful if it stays current. Discipline:
 
 ## Shipped
 
-*(nothing yet — Tier 1 items are still NEXT. As items complete, move them here from above with their completion line.)*
+*(Tier 1 items are now `DONE` and remain inline in their tier sections for now. They'll move down to this section once 5+ items have shipped.)*
 
 Last updated: 2026-05-05.

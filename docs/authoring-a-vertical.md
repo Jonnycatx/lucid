@@ -1,10 +1,15 @@
 # Authoring a Lucid Vertical
 
-A "vertical" is a domain Lucid is fluent in — documents, code review, creative writing, and so on. Adding a new one is a single YAML file. This guide walks through the whole flow end to end. Read it once, then copy from one of the existing verticals and specialize.
+A "vertical" is a domain Lucid is fluent in — documents, code review, creative writing, and so on. Adding a new one is a single YAML file. This guide walks through the whole flow end to end.
 
-The shipped verticals are good references in increasing order of specialization:
+**Start here:**
 
-- [`general/`](../src/lucid/verticals/general/config.yaml) — the universal fallback. Form-agnostic, soft defaults, never blocks. Start here when you want to copy something.
+- [`_template/config.yaml`](../src/lucid/verticals/_template/config.yaml) — fully-commented scaffold with TODO placeholders. **This is what you copy.** Underscore-prefixed directories are skipped by the registry, so the template never loads as a real vertical.
+- [`docs/principles.md`](principles.md) — the universal craft principles your vertical's `system_prompt` should reflect. Read this before drafting your prompt template.
+
+**Reference verticals** (read for examples, don't copy their content):
+
+- [`general/`](../src/lucid/verticals/general/config.yaml) — the universal fallback. Form-agnostic, soft defaults, never blocks.
 - [`document/`](../src/lucid/verticals/document/config.yaml) — narrow, opinionated, structurally strict (one-pager / executive summary).
 - [`creative/`](../src/lucid/verticals/creative/config.yaml) — specialized but tonally flexible (fiction, scenes, ad copy).
 - [`code/`](../src/lucid/verticals/code/config.yaml) — specialized with engineering-specific conventions and choice-typed answers.
@@ -53,14 +58,13 @@ touch src/lucid/verticals/recipe/config.yaml
 
 The id should be `<domain>.<subtype>`: `document.one_pager`, `creative.story`, `code.review`. For a single-vertical domain, `<domain>.<subtype>` is still preferred — it leaves room for siblings later.
 
-### 2. Copy from the closest existing vertical
+### 2. Copy the template, not a real vertical
 
-Don't start from a blank file. Copy the closest match and edit:
+Copy `src/lucid/verticals/_template/config.yaml` into your new directory. Every field has a `# TODO` marker and an inline note explaining what to fill in. Reference verticals (above) show what filled-in versions look like in practice — read them for examples, but copy from the template.
 
-- Generic deliverable form → copy `general/config.yaml`
-- Narrative or expressive work → copy `creative/config.yaml`
-- Technical / engineering output → copy `code/config.yaml`
-- Strict structural document → copy `document/config.yaml`
+```bash
+cp src/lucid/verticals/_template/config.yaml src/lucid/verticals/recipe/config.yaml
+```
 
 ### 3. Fill in the questions
 
@@ -98,7 +102,7 @@ The schema validates that every `{placeholder}` in the template is either a ques
 
 ### 5. Write the system prompt
 
-Short and sharp. The system prompt sets the role and the priorities. Three to six sentences is plenty.
+Short and sharp. The system prompt sets the role and the priorities. Three to six sentences is plenty. Should reflect the universal principles in [`docs/principles.md`](principles.md) — pick the ones most relevant to your domain — plus one or two domain-specific overrides.
 
 ```yaml
 system_prompt: |

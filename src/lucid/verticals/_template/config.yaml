@@ -1,0 +1,190 @@
+# Lucid vertical template.
+#
+# Copy this directory to a new name (e.g. `recipe/`, `legal/`, `data.postmortem/`)
+# and fill in the TODO sections. The directory name does not need to match the
+# vertical id — the id below is what's used internally.
+#
+# This template (and any directory whose name starts with `_`) is skipped by
+# the registry loader, so it never loads as a real vertical. Once you copy it
+# to a non-underscore directory and fill it in, it will be picked up
+# automatically on server start.
+#
+# Read `docs/authoring-a-vertical.md` for the full walkthrough. Read
+# `docs/principles.md` for the universal craft principles your vertical's
+# system_prompt should reflect.
+
+# ----- Identity ------------------------------------------------------------
+
+# TODO: dot-namespaced id. Convention: <domain>.<subtype>.
+# Example: document.one_pager, creative.story, code.review, recipe.weeknight.
+id: TODO.your_vertical
+
+# TODO: human-readable name. Shown in CLI listings and the lucid-check output.
+name: TODO Your Vertical Name
+
+# TODO: 2-3 sentence description. What problem does this vertical solve?
+# What kind of user requests does it serve?
+description: >
+  TODO. Describe what this vertical produces, who it serves, and what makes
+  it distinct from `general.fluency`. If you can't articulate why a generic
+  template wouldn't work, the vertical probably isn't justified yet — open
+  an issue first.
+
+version: 0.1.0
+
+# Set to `true` only for the universal fallback. There can be at most one
+# fallback vertical in the registry. Leave as false for any specialized vertical.
+is_fallback: false
+
+# ----- Listener: questions to extract ---------------------------------------
+
+# Questions are what the Listener tries to extract from the user's request.
+# Three rules of thumb:
+#   1. Bias toward optional with sensible defaults. Required questions surface
+#      as clarification turns and interrupt the flow. Mark required only when a
+#      wrong default would meaningfully damage the output.
+#   2. Keep the count under five. If you need more, reconsider the unit.
+#   3. Write `why_it_matters` honestly. It's the prompt the Listener uses
+#      internally to decide whether to surface this question to the user.
+#
+# Question types: text | choice | multi | number | boolean
+# choice and multi require an `options` list.
+
+questions:
+  - id: audience
+    prompt: Who is the intended audience for this output?
+    type: text
+    required: false
+    default: TODO sensible default for your domain
+    why_it_matters: >
+      TODO. What changes about the output if audience is wrong? Be specific —
+      "audience matters" is not enough.
+
+  # TODO: add 2-4 more questions specific to your domain. Examples:
+  #   - tone (creative): somber, playful, tense, romantic, satirical
+  #   - priority (code): readability, performance, correctness, balanced
+  #   - stakes (document): low, medium, high
+  #   - format (data): json, markdown table, prose
+  # Each question must have an id (used as a {placeholder} in prompt_template),
+  # type, why_it_matters. Required-by-default; mark required: false if it
+  # should accept a default.
+
+  - id: constraints
+    prompt: Any specific length, format, or content requirements?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Hidden constraints (length caps, must-include sections, things to avoid)
+      are the most common cause of an output missing the mark.
+
+# ----- Translator: prompt template ------------------------------------------
+
+# The template is rendered with {question_id} placeholders and the reserved
+# {original_intent} placeholder. The schema validator enforces that every
+# placeholder corresponds to either a question id you defined or
+# {original_intent} — otherwise the registry refuses to load.
+#
+# Three patterns that work well:
+#   1. Lead with the structured spec, then the verbatim user intent.
+#   2. Be explicit about form. Don't say "produce a good document" —
+#      say "open with one crisp sentence stating the recommendation,
+#      then 3-5 supporting points each with concrete evidence."
+#   3. End with anti-patterns. A list of things NOT to do tightens output.
+
+prompt_template: |
+  TODO: produce the deliverable the user requested.
+
+  Audience: {audience}
+  TODO: list the rest of your questions here.
+  Additional constraints: {constraints}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - TODO. List the form-specific requirements that make output good for
+    this domain. Be concrete — "lead with the recommendation, support with
+    3-5 specific evidence points, close with one explicit next action."
+  - Match tone and assumed knowledge to the audience.
+  - Respect explicit constraints precisely.
+  - If "Additional constraints" is empty, ignore that line.
+  - Do not summarize or meta-comment on your own output. Deliver and stop.
+
+# ----- Translator: system prompt --------------------------------------------
+
+# Short and sharp. Sets the role and the priorities. 3-6 sentences is plenty.
+# This will be sent as a cacheable content block, so keep it stable across
+# calls — don't include per-request data here.
+#
+# Should reflect the relevant principles from `docs/principles.md` for this
+# domain. (A planned refactor — punch-list item #23 — will have verticals
+# compose from principles.md rather than restate.)
+
+system_prompt: |
+  TODO: You are [the role this vertical embodies].
+  TODO: 2-3 sentences of priorities and disciplines.
+  TODO: One sentence of what to avoid.
+
+# ----- Output format --------------------------------------------------------
+
+# How the output is shaped. Used by the Validator and downstream clients.
+# Options: text | markdown | json | code | structured (mixed prose + fields)
+output_format: markdown
+
+# ----- Validator: rubric ----------------------------------------------------
+
+# How the Validator (Phase 4) will grade output. Each criterion has an id,
+# name, plain-language description, and a relative weight. Weights are NOT
+# auto-normalized — the Validator computes weighted_average / sum(weights).
+#
+# Even though the Validator is opt-in (`validate=True`), write the rubric
+# thoughtfully. The criteria are also a discipline check on the prompt
+# template — if you can't articulate what good looks like, the prompt
+# template probably can't produce it either.
+
+rubric:
+  - id: intent_fidelity
+    name: Intent fidelity
+    description: TODO. How is "delivers what the user actually asked for" judged in this domain?
+    weight: 1.5
+
+  # TODO: 3-5 more criteria. Examples:
+  #   - structure: form is right (one-pager skeleton, narrative arc, etc.)
+  #   - specificity: concrete particulars, not abstractions
+  #   - audience_calibration: tone matches stated audience
+  #   - constraint_compliance: explicit constraints respected
+  #   - form-specific: e.g. "ending" for stories, "code-first" for refactors
+
+  - id: specificity
+    name: Specificity
+    description: Output is concrete and specific, not generic, padded, or hedged.
+    weight: 1.0
+
+# Weighted-average score (0-1) required for the output to pass validation.
+# 0.7 is a reasonable default. Lower it if your domain has soft criteria;
+# raise it if outputs need to be especially tight.
+pass_threshold: 0.7
+
+# ----- Triage: how this vertical is selected --------------------------------
+
+# Triage is keyword-based and case-insensitive in v0.1. Add the phrases users
+# actually say. Two rules:
+#   1. Prefer phrases over single words. "memo" is too broad; "decision memo"
+#      is right.
+#   2. Don't poach generic words. "write" and "create" should not be on any
+#      vertical's keyword list — they belong to the fallback. Keywords should
+#      be the words that distinguish *your* vertical from every other one.
+
+priority: 0    # higher wins on tiebreaks; reserve high values for narrow verticals
+
+keywords:
+  - TODO_specific_phrase
+  - TODO_another_phrase
+  # ... 5-15 keywords typical
+
+# Example user requests that fit this vertical. Used for documentation and
+# (in a later phase) as few-shot data for the LLM-based triage classifier.
+examples:
+  - "TODO: an example user request that should route to this vertical"
+  - "TODO: another example, ideally one that reads differently from the first"

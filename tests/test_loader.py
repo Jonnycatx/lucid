@@ -96,6 +96,23 @@ def test_load_registry_includes_specialized_verticals():
         assert reg[vid].is_fallback is False
 
 
+def test_underscore_prefixed_directories_are_skipped():
+    """The _template scaffold (and any other _-prefixed dir) is not a vertical
+    and must not appear in the registry."""
+    reg = load_registry()
+    template_ids = [vid for vid in reg if vid.startswith("TODO")]
+    assert template_ids == [], (
+        f"Underscore-prefixed dirs should be skipped, but found: {template_ids}"
+    )
+    assert "_template" not in reg
+    # Sanity: the _template/config.yaml file exists on disk but isn't loaded.
+    from pathlib import Path
+
+    from lucid.verticals._loader import VERTICALS_DIR
+
+    assert (Path(VERTICALS_DIR) / "_template" / "config.yaml").is_file()
+
+
 def test_triage_routes_creative_prompt_to_creative_story():
     """A clearly creative request hits the creative vertical, not fallback."""
     v = triage("write a short story about an unreliable narrator on a heist")
