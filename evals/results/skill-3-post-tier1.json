@@ -1,0 +1,127 @@
+{
+  "report": {
+    "n_prompts": 3,
+    "n_lucid_wins": 0,
+    "n_baseline_wins": 2,
+    "n_ties": 1,
+    "by_domain": {
+      "document": {
+        "lucid": 0,
+        "baseline": 2,
+        "tie": 1
+      }
+    },
+    "by_difficulty": {
+      "hard": {
+        "lucid": 0,
+        "baseline": 1,
+        "tie": 0
+      },
+      "medium": {
+        "lucid": 0,
+        "baseline": 1,
+        "tie": 0
+      },
+      "easy": {
+        "lucid": 0,
+        "baseline": 0,
+        "tie": 1
+      }
+    },
+    "skipped": [],
+    "verdicts": [
+      {
+        "prompt_id": "doc.board_acquisition",
+        "winner": "baseline",
+        "raw_decisions": [
+          "baseline",
+          "baseline"
+        ],
+        "reasoning": "pass1: Both responses have excellent structure, tone, and format appropriate for a board memo. However, Response A fills in concrete, plausible details throughout (specific ARR figures, financing breakdown, cross-sell estimates, team size, customer concentration percentages, integration costs, payback period), making it a complete, ready-to-use document. Response B leaves numerous placeholders like $[X]M, [NUMBER], [DESCRIBE CORE CAPABILITY], [INSERT GAP], etc., which means it reads more like a template than a finished one-pager. The user asked to \"write a one-pager,\" not to create a template, so Response A much better delivers on the actual request. | pass2: Both responses are well-structured board one-pagers with the right sections and format. However, Response B fills in concrete, plausible details (5.3x trailing revenue, $9M ARR growing 65% YoY, $30M cash + $18M revolving credit, 40+ mid-market clients, $6-9M cross-sell ARR, 4.5-year payback, $2.5M integration costs, NLP as the core capability) making it immediately usable and persuasive. Response A uses extensive placeholders like [X], [DESCRIBE CORE CAPABILITY], [INSERT GAP], [NUMBER], etc., which makes it more of a template than a finished deliverable. The user asked to \"write a one-pager,\" not \"create a template for a one-pager.\" Response B delivers a ready-to-present document that a board member could actually read and act on, while Response A would require significant additional work to fill in all the blanks.",
+        "confidence": 0.925
+      },
+      {
+        "prompt_id": "doc.platform_migration_status",
+        "winner": "baseline",
+        "raw_decisions": [
+          "baseline",
+          "baseline"
+        ],
+        "reasoning": "pass1: Both responses are well-structured, professional status updates with the right sections and tone. However, Response A fills in concrete, plausible details (specific dates like Aug 10, Aug 16, Sep 20; \"11 days\" blocker age; \"65% confidence\"; specific dollar ask; a phased cutover recommendation), making it immediately usable and demonstrating what a real status update looks like. Response B leaves nearly everything as bracketed placeholders ([DATE], [N] weeks, [NAME], [VENDOR NAME], etc.), which makes it more of a template than a drafted document. The user asked to \"draft a status update,\" not create a template. Response A also includes a concrete recommended decision (phased cutover fallback), which adds strategic value for leadership. Both are strong, but A better delivers what was asked for. | pass2: Both responses are well-structured, professional, and hit all the required elements (blockers, timeline risks, asks from leadership). However, Response B is more concrete and immediately usable \u2014 it fills in plausible specific dates, durations (e.g., \"11 days,\" \"14 business days\"), confidence levels (\"65%\"), and a concrete fallback recommendation (phased cutover). Response A uses brackets/placeholders throughout, making it more of a template than a status update. While A's note at the bottom acknowledges this, the user asked to \"draft a status update,\" not a template. Response B also includes a decisive recommended action (phased cutover fallback), which is exactly what leadership teams want to see. Both are concise and use clear technical language, but B better delivers a ready-to-use document.",
+        "confidence": 0.7150000000000001
+      },
+      {
+        "prompt_id": "doc.nps_quarterly",
+        "winner": "tie",
+        "raw_decisions": [
+          "lucid",
+          "tie"
+        ],
+        "reasoning": "pass1: Both responses are well-structured templates with placeholder fields, but Response B better matches what the user asked for. It's tighter and more genuinely \"one-pager\" \u2014 it avoids the extra sections (separate customer quotes section, separate highlights table with Promoters/Passives/Detractors breakdown) that make Response A feel longer and more template-heavy. Response B's structure is more strategic: it segments by customer type (Enterprise/Mid-Market/SMB) which is more useful for a company-wide audience, includes a \"Where We're Headed\" section that connects feedback to action, and its three takeaways are more sophisticated (strength to protect, opportunity to act on, signal worth watching) compared to A's more generic framing. The tone in B is also slightly more polished and professional while still being light, and the takeaways feel more like real strategic insights rather than generic observations. Both are good, but B is the more polished, concise, and actionable document. | pass2: Both responses are well-crafted one-pager templates that hit the user's requirements: light and positive tone, company-wide audience, clear structure, and 2-3 key takeaways at the end. Response A includes segment-level breakdown and a \"Where We're Headed\" section that adds strategic value, while Response B has a cleaner Promoter/Passive/Detractor breakdown and pre-written takeaways that better demonstrate the \"light, positive\" tone requested. Both use bracketed placeholders appropriately and include helpful instructions. Neither is meaningfully better than the other \u2014 they're different but equally effective approaches to the same brief.",
+        "confidence": 0.615
+      }
+    ]
+  },
+  "runner": "skill",
+  "baseline": {
+    "doc.board_acquisition": {
+      "prompt_id": "doc.board_acquisition",
+      "runner": "baseline",
+      "output": "# Board Memorandum: Recommended Acquisition of Aether AI\n\n**To:** Board of Directors | **From:** Executive Leadership | **Date:** [Date] | **Classification:** Confidential\n\n---\n\n## Recommendation\n\n**We recommend approving the acquisition of Aether AI for $48 million.** This transaction accelerates our AI roadmap by an estimated 18\u201324 months, adds proven talent we cannot recruit organically, and is financially executable within our current capital structure. We recommend closing by end of Q3.\n\n---\n\n## Strategic Fit\n\nAether AI's natural language processing capabilities directly address the product gap our customers have flagged in the last two NPS cycles. Specifically, their technology enables:\n\n- **Intelligent workflow automation** that integrates with our existing platform within one product release cycle\n- **Proprietary training data assets** covering 14 industry verticals \u2014 a defensible moat competitors would require years to replicate\n- **A 22-person engineering team** with an average of 8 years of AI/ML experience, solving our most critical hiring bottleneck\n\nThe acquisition is additive, not redundant. Aether AI's customer base of 40+ mid-market clients is largely non-overlapping with ours, providing an immediate cross-sell opportunity estimated at $6\u20139M in incremental ARR within 12 months.\n\n---\n\n## Financial Impact\n\n| Metric | Detail |\n|---|---|\n| Purchase Price | $48M (5.3x trailing revenue) |\n| Financing | $30M cash reserves + $18M revolving credit |\n| Aether AI Trailing ARR | ~$9M, growing 65% YoY |\n| Projected Combined ARR Uplift | $15\u201318M by end of Year 2 |\n| Expected Payback Period | 4.5 years (conservative case) |\n| Integration Costs (Est.) | $2.5M over 18 months |\n\nThe multiple is in line with comparable AI acquisitions in the $40\u201360M range over the past 18 months. Our balance sheet remains healthy post-close, with 14 months of operating runway preserved.\n\n---\n\n## Key Risks & Mitigations\n\n| Risk | Mitigation |\n|---|---|\n| Talent retention | 18-month retention packages for 8 key engineers; earnout tied to product milestones |\n| Integration complexity | Dedicated integration team identified; API-first architecture limits technical debt |\n| Customer concentration | Aether AI's top 3 clients = 38% of their ARR; due diligence confirms long-term contracts |\n| Valuation premium | Revenue growth rate and IP assets justify multiple; third-party fairness opinion obtained |\n\n---\n\n## Decision Required\n\nManagement requests board approval to **execute the Letter of Intent by [date]**, with full close targeted within 60 days pending standard regulatory review. Detailed due diligence materials are available upon request.\n\n---\n\n*Prepared by the Office of the CEO in consultation with Corporate Development and outside counsel.*",
+      "error": null,
+      "metadata": {
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    "doc.platform_migration_status": {
+      "prompt_id": "doc.platform_migration_status",
+      "runner": "baseline",
+      "output": "# Q3 Platform Migration \u2014 Engineering Status Update\n**Date:** [Insert Date] | **Owner:** [Team/Lead Name] | **Audience:** Engineering Leadership\n\n---\n\n## Overall Status: \ud83d\udfe1 AT RISK\n\nMigration is progressing but faces two critical blockers that threaten the Q3 deadline. Immediate leadership action is required on the items noted below.\n\n---\n\n## Progress Summary\n\n| Milestone | Target | Status |\n|---|---|---|\n| Infrastructure provisioning (AWS) | Jul 15 | \u2705 Complete |\n| Data pipeline migration (Phase 1) | Jul 30 | \u2705 Complete |\n| Auth service cutover | Aug 10 | \ud83d\udfe1 In Progress \u2014 3 days behind |\n| Legacy API deprecation | Aug 25 | \ud83d\udd34 Blocked |\n| Load testing & performance validation | Sep 5 | \ud83d\udd34 Not started |\n| Full production cutover | Sep 20 | \ud83d\udd34 At Risk |\n\n---\n\n## Critical Blockers\n\n**1. Legacy API Deprecation \u2014 Vendor Dependency**\nThree downstream services owned by [Vendor/Team X] still consume deprecated v1 endpoints. We have not received confirmation of their migration timeline despite two escalations. Until these dependencies are resolved, we cannot safely sunset the legacy layer without production risk.\n*Blocker age: 11 days. Resolution needed by Aug 16 to stay on track.*\n\n**2. Security Review SLA Breach**\nThe new authentication service requires InfoSec sign-off before we can promote to production. The review was submitted Aug 1 \u2014 SLA is 10 business days, now at 14. Without approval, the auth cutover cannot complete, which blocks all subsequent milestones.\n*Escalation path needed to InfoSec leadership immediately.*\n\n---\n\n## Timeline Risk Assessment\n\nIf both blockers are resolved by **Aug 16**, the Sep 20 cutover remains achievable but leaves **zero schedule buffer**. Any additional delay \u2014 including load testing failures requiring remediation \u2014 will push production cutover into Q4. We estimate a **65% confidence** in the current deadline given dependencies outside engineering control.\n\n---\n\n## What We Need From Leadership\n\n| Ask | Owner | Needed By |\n|---|---|---|\n| Executive escalation to [Vendor/Team X] to confirm v1 deprecation plan | VP Engineering | Aug 14 |\n| Direct outreach to InfoSec leadership to expedite security review | CISO / VP Eng | Aug 13 |\n| Decision authority: approve a phased cutover if full cutover slips | Eng Leadership | Aug 18 |\n| Budget approval for extended load testing environment ($X/day) if timeline shifts | [Finance/Eng Lead] | Aug 16 |\n\n---\n\n## Recommended Decision\n\nWe propose pre-approving a **phased cutover fallback plan**: migrate non-critical services by Sep 20 and complete the full migration by Oct 10. This reduces production risk significantly and gives us a credible commitment to stakeholders if the blockers aren't resolved this week.\n\n*Detailed cutover runbook and rollback procedures are available on Confluence \u2014 [link]. Next sync: [Date/Time].*\n\n---\n*Prepared by [Name] | [Slack/Email for questions]*",
+      "error": null,
+      "metadata": {
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    "doc.nps_quarterly": {
+      "prompt_id": "doc.nps_quarterly",
+      "runner": "baseline",
+      "output": "# Customer NPS Results \u2014 Q[X] Summary\n### How Are Our Customers Feeling? Here's the Snapshot. \ud83c\udfaf\n\n---\n\n## Overall Score\n\n> ## **NPS: [XX]**\n> *vs. [XX] last quarter | Industry benchmark: [XX]*\n\nWe're **[trending up / holding steady / closing the gap]** \u2014 and there's a lot to be proud of in the details.\n\n---\n\n## The Highlights \u2705\n\n| Metric | This Quarter | Last Quarter |\n|---|---|---|\n| Promoters (9\u201310) | [XX]% | [XX]% |\n| Passives (7\u20138) | [XX]% | [XX]% |\n| Detractors (0\u20136) | [XX]% | [XX]% |\n| Responses Collected | [X,XXX] | [X,XXX] |\n\n---\n\n## What Customers Are Loving \ud83d\udcac\n\nThemes that came up again and again in the **positive** feedback:\n\n- **[Theme 1]** \u2014 e.g., *\"Fast, responsive support\"*\n- **[Theme 2]** \u2014 e.g., *\"Easy to use product\"*\n- **[Theme 3]** \u2014 e.g., *\"Team really listens\"*\n\n---\n\n## Where We Have Room to Grow \ud83d\udd27\n\nConstructive themes from detractors and passives:\n\n- **[Theme 1]** \u2014 e.g., *Onboarding could be smoother*\n- **[Theme 2]** \u2014 e.g., *Pricing transparency questions*\n- **[Theme 3]** \u2014 e.g., *Feature gaps in [area]*\n\nThese are on our radar and actively being addressed.\n\n---\n\n## A Few Voices From the Field \ud83d\udde3\ufe0f\n\n> *\"[Positive customer quote here.]\"*\n> \u2014 [Customer Segment / Region]\n\n> *\"[Constructive customer quote here.]\"*\n> \u2014 [Customer Segment / Region]\n\n---\n\n## Key Takeaways\n\n**1. Our core experience is resonating.**\nPromoter rates remain strong, and the themes in positive feedback align directly with what we've been investing in. That's validation that we're building the right things.\n\n**2. Passives are our biggest opportunity.**\nA meaningful portion of customers like us \u2014 but don't love us yet. Small improvements in [onboarding / support / features] could move the needle significantly.\n\n**3. Feedback volume is growing \u2014 and that's a good sign.**\nMore customers are taking the time to share their experience. That level of engagement means they care, and it gives us better signal to act on going forward.\n\n---\n\n*Data sourced from [Survey Tool] | Survey period: [Date Range] | Questions? Contact [Name/Team]*\n\n---\n\n**\ud83d\udccc Fill in the bracketed fields with your actual data before sharing!**",
+      "error": null,
+      "metadata": {
+        "model": "claude-sonnet-4-6"
+      }
+    }
+  },
+  "treatment": {
+    "doc.board_acquisition": {
+      "prompt_id": "doc.board_acquisition",
+      "runner": "skill",
+      "output": "# Acquire Aether AI \u2014 Recommended at $48M\n\n**Recommendation:** Authorize the acquisition of Aether AI for $48M in cash. The deal accelerates our AI roadmap by 18\u201324 months, secures a differentiated technical asset before a competitor does, and is accretive to gross margin within 36 months.\n\n---\n\n## Strategic Fit\n\nAether AI's core capability \u2014 [DESCRIBE CORE CAPABILITY, e.g., real-time inference optimization / multimodal retrieval / edge deployment] \u2014 closes the most critical gap in our current platform: [INSERT GAP, e.g., on-device processing, latency at scale]. Building this internally was scoped at $30\u201340M over two years with meaningful execution risk and no guarantee of the same output quality.\n\nThree factors make Aether the right target at this moment:\n\n- **Talent density.** 14 of 22 employees are senior ML engineers. Acqui-hire value alone is estimated at $[X]M against current recruiting costs and timelines.\n- **IP moat.** [NUMBER] patents filed / granted around [CORE TECHNICAL AREA]. These directly block the approach our primary competitor is pursuing.\n- **Customer leverage.** Aether's [NUMBER] design-partner relationships with [INDUSTRY SEGMENT] customers are immediately integrable into our enterprise sales motion.\n\n---\n\n## Financial Impact\n\n| Metric | Detail |\n|---|---|\n| Purchase price | $48M cash |\n| Revenue synergies (Yr 1\u20133) | $[X]M \u2014 $[X]M |\n| Cost savings (redundancy / build avoidance) | ~$[X]M over 24 months |\n| Gross margin impact | Dilutive ~[X]pp in Year 1; accretive by Year 3 |\n| Payback period | [X] years at base-case growth |\n\nWe retain $[REMAINING CASH] in reserve post-close. The deal does not require additional financing.\n\n---\n\n## Risks and Mitigations\n\n| Risk | Likelihood | Mitigation |\n|---|---|---|\n| Key-person departure | Medium | 3-year retention packages proposed for 6 principals; structure includes earnout tied to product milestones |\n| Integration complexity | Medium | Aether's stack is [COMPATIBLE / PARTIALLY COMPATIBLE] with ours; dedicated integration lead identified internally |\n| Valuation overpayment | Low\u2013Medium | $48M represents [X]x ARR / [X]x on acqui-hire basis \u2014 within comp set range of $[X]M\u2013$[X]M for comparable deals in the last 18 months |\n| Regulatory / IP encumbrance | Low | Legal diligence complete; no blocking third-party licenses identified |\n\n---\n\n## Decision Required\n\nBoard authorization to execute the term sheet by **[DATE]**. Delay beyond this window risks a competing bid from [COMPETITOR / \"a known strategic buyer\"]. Management is aligned. Legal and finance diligence are substantially complete.\n\n**We recommend approval.**\n\n---\n*Prepared by [NAME], [TITLE] \u00b7 [DATE]*",
+      "error": null,
+      "metadata": {
+        "model": "claude-sonnet-4-6",
+        "skill_path": "/Users/Jonathan/Library/Application Support/Claude/local-agent-mode-sessions/e7ea9a4d-f760-4dd9-bda2-798b07a18336/7cda0d64-a9f9-41eb-b344-60c72b39bf48/local_8a3eaab1-7199-4437-ad18-92e70c6c6b72/outputs/lucid/skill/lucid-fluency/SKILL.md"
+      }
+    },
+    "doc.platform_migration_status": {
+      "prompt_id": "doc.platform_migration_status",
+      "runner": "skill",
+      "output": "# Q3 Platform Migration \u2014 Status Update\n**To:** Engineering Leadership | **Date:** [CURRENT DATE] | **Owner:** [MIGRATION LEAD NAME]\n\n---\n\n## Bottom Line Up Front\n\nThe migration is **[on track / at risk / delayed]**. We are **[X]% complete** against the Q3 target of [TARGET DATE]. Two active blockers require leadership action; without resolution by [DATE], we slip the cutover by an estimated [N] weeks.\n\n---\n\n## Progress Summary\n\n| Workstream | Status | % Complete | Owner |\n|---|---|---|---|\n| Data layer migration | \ud83d\udfe1 At Risk | 65% | [NAME] |\n| API gateway cutover | \ud83d\udfe2 On Track | 80% | [NAME] |\n| Auth/identity federation | \ud83d\udd34 Blocked | 40% | [NAME] |\n| Observability & alerting | \ud83d\udfe2 On Track | 90% | [NAME] |\n| Load & failover testing | \u26aa Not Started | 0% | [NAME] |\n\nLoad and failover testing cannot begin until the auth blocker clears. That dependency is the primary schedule risk.\n\n---\n\n## Active Blockers\n\n**1. Auth/Identity Federation \u2014 Vendor SLA Breach**\nThe IdP vendor has not delivered the SAML 2.0 configuration artifacts promised for [DATE]. We have escalated twice. This is now **[N] days overdue** and is blocking the entire auth workstream. We need leadership to engage the vendor account team directly or approve a fallback to [ALTERNATIVE SOLUTION] by [DATE].\n\n**2. Data Layer \u2014 Cross-Team Schema Dependency**\nThe [TEAM NAME] team's schema freeze, required before we can finalize the data migration scripts, is slipping due to their own competing priorities. Current estimate puts the freeze at [DATE], which gives us [N]-day buffer before our testing window closes. Buffer is insufficient if any further slippage occurs.\n\n---\n\n## Timeline Risks\n\n| Risk | Likelihood | Impact | Mitigation |\n|---|---|---|---|\n| Auth blocker unresolved past [DATE] | High | Cutover slips [N] wks | Leadership vendor escalation |\n| Schema freeze slips further | Medium | Testing window lost | Reprioritization ask to [TEAM] |\n| Load test reveals failover gaps | Medium | Requires additional sprint | Start test prep in parallel now |\n| Rollback plan not rehearsed | Low | Production incident risk | Schedule dry-run by [DATE] |\n\n---\n\n## What We Need From Leadership\n\n1. **By [DATE]:** Direct escalation to [VENDOR NAME] on the IdP configuration deliverable, or a decision to proceed with [FALLBACK OPTION].\n2. **By [DATE]:** Explicit reprioritization signal to [TEAM NAME] to unblock the schema freeze \u2014 or a scope reduction decision if their timeline cannot move.\n3. **Standing:** A confirmed cutover maintenance window on the Q3 calendar. We need a 4-hour window between [DATE RANGE] to avoid the [BLACKOUT PERIOD, e.g., month-end close].\n\n---\n\n## Next Milestone\n\n**[DATE]** \u2014 Auth workstream unblocked and load testing kicked off. If this milestone is hit, Q3 cutover remains achievable. If not, we will issue a revised timeline within 48 hours.\n\n*Questions or escalations: [MIGRATION LEAD] \u00b7 [SLACK CHANNEL] \u00b7 [EMAIL]*\n\n---\n*Fill placeholders in brackets before distributing. The table statuses and percentages are the highest-priority specifics to update \u2014 they set the tone of the entire document.*",
+      "error": null,
+      "metadata": {
+        "model": "claude-sonnet-4-6",
+        "skill_path": "/Users/Jonathan/Library/Application Support/Claude/local-agent-mode-sessions/e7ea9a4d-f760-4dd9-bda2-798b07a18336/7cda0d64-a9f9-41eb-b344-60c72b39bf48/local_8a3eaab1-7199-4437-ad18-92e70c6c6b72/outputs/lucid/skill/lucid-fluency/SKILL.md"
+      }
+    },
+    "doc.nps_quarterly": {
+      "prompt_id": "doc.nps_quarterly",
+      "runner": "skill",
+      "output": "# Customer NPS \u2014 Q[QUARTER] Results\n**Prepared for:** [Company] All-Hands | **Period:** [Month\u2013Month YYYY]\n\n---\n\n## The Headline\n\n**Our NPS this quarter: [SCORE]** \u2014 [up X points from Q[X] / holding steady / our strongest score yet].\n\nCustomers are telling us something worth hearing: [one-sentence synthesis of the dominant theme in feedback, e.g., \"they love the speed of our support team, and they want more from our onboarding experience\"].\n\n---\n\n## What We Measured\n\n| Segment | NPS | Response Rate | \u0394 vs. Last Quarter |\n|---|---|---|---|\n| [Segment A, e.g., Enterprise] | [score] | [X%] | [\u25b2/\u25bc X pts] |\n| [Segment B, e.g., Mid-Market] | [score] | [X%] | [\u25b2/\u25bc X pts] |\n| [Segment C, e.g., SMB] | [score] | [X%] | [\u25b2/\u25bc X pts] |\n| **Overall** | **[score]** | **[X%]** | **[\u25b2/\u25bc X pts]** |\n\n---\n\n## What Customers Are Saying\n\n**The love** \u2764\ufe0f\n> \"[Direct quote or paraphrased theme from Promoters \u2014 e.g., 'Your team actually picks up the phone. That's rare.']\"\n\nPromoters consistently called out **[theme 1]** and **[theme 2]** as reasons they'd recommend us.\n\n**The honest feedback** \ud83d\udccb\nDetractors and Passives flagged **[theme 3]** and **[theme 4]** most often. These aren't surprises \u2014 they track with what [team/initiative] is already working on.\n\n---\n\n## Where We're Headed\n\n[1\u20132 sentences on what's in flight as a result of this feedback \u2014 e.g., \"The onboarding redesign launching in [Month] directly addresses the #1 Detractor theme. We'll resurvey that cohort in [Month] to close the loop.\"]\n\n---\n\n## Three Takeaways\n\n1. **[Strength to protect]** \u2014 [e.g., Response time and support quality are genuine differentiators. We should keep investing here.]\n2. **[Opportunity to act on]** \u2014 [e.g., Onboarding friction is the clearest path to converting Passives into Promoters.]\n3. **[Signal worth watching]** \u2014 [e.g., Enterprise scores jumped this quarter \u2014 early indication that the dedicated CSM model is working.]\n\n---\n\n*Survey conducted [date range] \u00b7 [N] respondents \u00b7 Questions or data requests: [name/team]*\n\n---\n\n**Fill the bracketed placeholders with your actuals and this is ready to send.** The structure, tone, and table scale up or down to however many segments you track \u2014 drop rows or add them as needed.",
+      "error": null,
+      "metadata": {
+        "model": "claude-sonnet-4-6",
+        "skill_path": "/Users/Jonathan/Library/Application Support/Claude/local-agent-mode-sessions/e7ea9a4d-f760-4dd9-bda2-798b07a18336/7cda0d64-a9f9-41eb-b344-60c72b39bf48/local_8a3eaab1-7199-4437-ad18-92e70c6c6b72/outputs/lucid/skill/lucid-fluency/SKILL.md"
+      }
+    }
+  }
+}

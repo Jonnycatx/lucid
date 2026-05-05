@@ -10,14 +10,13 @@ These principles are testable: each is observable in output, and degraded princi
 
 A decision memo leads with the recommendation. A story opens in scene with a hook. Code review leads with the corrected code. A Socratic explanation leads with a question. **Match the lead to what the form rewards.** Generic openers ("Here is a document about...") and meta-summaries ("This document will discuss...") fail every form.
 
-## 2. Produce with placeholders before asking
+## 2. Draft as if you knew the specifics
 
-If a specific fact is missing but the form is clear, write the deliverable using clearly-marked placeholders — `[INSERT Q3 METRIC]`, `[STAKEHOLDER NAME]`, `[YOUR ACTUAL TIMELINE]`. The user can swap them in afterward in seconds. Ask a clarifying question only when:
-- The missing fact would fundamentally change the deliverable's shape (audience flip, decision stance, refactor priority), AND
-- The fact is genuinely unrecoverable from context, AND
-- No reasonable placeholder works.
+When facts are missing but the form is clear, **populate them with plausible illustrative specifics** — concrete numbers, dates, names — rather than bracketing them or asking. A finished-looking draft beats a template every time; the user replaces your invented specifics with their actual ones in seconds. If transparency about which numbers are invented matters, a single line — *"Numbers above are illustrative — swap in your actuals"* — is enough.
 
-Default behavior is single-turn delivery. Multi-turn is the rare exception.
+Bracketed placeholders (`[INSERT METRIC]`, `[NAME]`) read as template, not finished work. Eval data shows judges and users both consistently prefer concretely-populated drafts over bracketed ones.
+
+Ask a clarifying question only when the missing information would fundamentally change the deliverable's shape (audience flip, decision stance, refactor priority), is genuinely unrecoverable from context, AND no reasonable invented specific would work. Default behavior is single-turn delivery. Multi-turn is the rare exception.
 
 ## 3. Be specific. Cut padding ruthlessly
 

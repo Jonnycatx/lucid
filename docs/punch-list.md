@@ -12,9 +12,14 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 1. The skill clarifies too aggressively for one-shot use cases.
 2. When the skill commits to producing output, it wins for the right structural reasons (specificity, concrete numbers, narrative voice).
 
-### 1. Skill body clarification fix · **DONE**
+### 1. Skill body clarification fix · **DONE (v3 — eval-iterated)**
 
-*Completed 2026-05-05 · this commit · Skill now defaults to producing-with-placeholders; multi-turn is the rare exception, not the norm. Synced standalone and plugin skill bodies.*
+*Completed 2026-05-05 over three iterations:*
+- *v1 (original): "ask if 50%+ output change" — n=3 smoke showed model interpreted this too liberally; 1/3 prompts lost outright with judge confidence 0.95 because the skill asked instead of producing.*
+- *v2 (first fix, commit `0effd3b`): "produce with bracketed placeholders, ask only when truly necessary" — n=3 smoke showed Lucid losing 0/2/1 because outputs felt like templates ("$[X]M acquisition · [Y]% IRR" reads as unfinished work).*
+- *v3 (final, this commit): "produce a finished draft with plausible illustrative specifics — concrete numbers, dates, names. Optional one-line note that numbers are illustrative." n=3 smoke showed 2/0/1 with wins driven by specificity ("Postgres → Aurora, $18K/month, sprint numbers"). Bracket count dropped to ~0 in skill outputs.*
+
+*Standalone and plugin SKILL.md kept identical. principles.md item #2 also updated to match. Two result JSONs saved as evidence trail.*
 
 **What.** Edit [`skill/lucid-fluency/SKILL.md`](../skill/lucid-fluency/SKILL.md) to bias toward producing-with-placeholders over asking, and tighten the "when to ask" rule to genuinely-unrecoverable cases (audience flips that change tone fundamentally; decisions the user hasn't actually made). Add explicit guidance: when concrete facts are missing but the form is clear, produce a draft using `[INSERT METRIC]`-style placeholders and close with "want me to swap in real specifics?"
 
@@ -64,7 +69,9 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 
 **Effort.** ~1 hr · no API cost to build (test mocked).
 
-### 6. n=3 smoke re-run · **NEXT** *(Tier 1 dependency cleared)*
+### 6. n=3 smoke re-run · **DONE (twice — drove v2→v3 iteration)**
+
+*Completed 2026-05-05 · this commit · Re-ran n=3 smoke twice, ~$2 total. First run validated v2 fix (clarification gone) but exposed bracketed-placeholder problem. Second run validated v3 fix — outputs now confidently populate plausible specifics. Saved both JSONs to evals/results/ as evidence trail. Variance still dominant at n=3 (win rates have spanned 0%–100% across four runs), so the headline number remains unpublishable until n=10 or n=30 lands.*
 
 **What.** `python -m evals.harness compare --limit 3 --runner skill` after Tier 1 lands. Confirms the clarification issue is gone before any larger spend.
 
