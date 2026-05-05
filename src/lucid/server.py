@@ -130,6 +130,14 @@ def run_lucid(
         client=client,
     )
 
+    # An extraction error is non-fatal *if* clarification can still recover
+    # the missing answers — the user supplies them in the next turn. If both
+    # an error happened AND no required answers remain missing (caller already
+    # provided them), we proceed silently. If both an error happened AND we'd
+    # need clarification anyway, surface the clarification path normally.
+    # The only case we surface as 'error' is a Translator API failure, where
+    # there is no fallback path.
+
     if listener.needs_clarification:
         return {
             "status": "needs_clarification",
@@ -144,6 +152,7 @@ def run_lucid(
             "questions_to_ask": [
                 _question_lookup(vertical, qid) for qid in listener.missing_required
             ],
+            "listener_error": listener.error,
         }
 
     # Translator
@@ -154,6 +163,22 @@ def run_lucid(
         client=client,
     )
 
+    if translator.error is not None:
+        return {
+            "status": "error",
+            "message": (
+                "The execution model call failed. The original intent and "
+                "rendered prompt are included so the client can retry, "
+                "diagnose, or surface a useful message to the user."
+            ),
+            "intent": intent,
+            "vertical": _vertical_summary(vertical),
+            "answers_used": listener.answers,
+            "rendered_prompt": translator.rendered_prompt,
+            "error": translator.error,
+            "listener_error": listener.error,
+        }
+
     return {
         "status": "complete",
         "intent": intent,
@@ -163,6 +188,7 @@ def run_lucid(
         "result": translator.output,
         "model_used": translator.model_used,
         "rendered_prompt": translator.rendered_prompt,
+        "listener_error": listener.error,
     }
 
 

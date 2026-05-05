@@ -140,6 +140,26 @@ def test_run_lucid_with_unknown_hint():
     assert "document.one_pager" in out["available_verticals"]
 
 
+# ----- error path (Translator API failure) --------------------------------
+
+
+def test_run_lucid_returns_error_when_translator_api_fails():
+    """A Translator API exception surfaces as status='error' with the message
+    and the rendered prompt (so a client can retry or display it)."""
+    client = MagicMock()
+    client.messages.create.side_effect = RuntimeError("upstream timeout")
+    out = run_lucid(
+        "should we sunset product X?",
+        vertical_hint="document.one_pager",
+        answers={"audience": "execs", "purpose": "decision"},
+        client=client,
+    )
+    assert out["status"] == "error"
+    assert "upstream timeout" in out["error"]
+    assert out["rendered_prompt"]
+    assert out["vertical"]["id"] == "document.one_pager"
+
+
 # ----- multi-turn clarification loop --------------------------------------
 
 

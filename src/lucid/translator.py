@@ -51,6 +51,9 @@ class TranslatorResult:
     model_used: str
     """The model id used. '(stub)' if no client was provided."""
 
+    error: Optional[str] = None
+    """If the API call failed, the error message. Output will be empty in this case."""
+
 
 def run_translator(
     intent: str,
@@ -95,9 +98,28 @@ def run_translator(
         "messages": [{"role": "user", "content": rendered_prompt}],
     }
     if rendered_system is not None:
-        request_kwargs["system"] = rendered_system
+        # Use content-block form so we can mark the system prompt cacheable.
+        # The system prompt is identical across all calls for a given vertical,
+        # so caching it removes 5–15% of cost on repeated calls within the
+        # 5-minute TTL window.
+        request_kwargs["system"] = [
+            {
+                "type": "text",
+                "text": rendered_system,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ]
 
-    response = client.messages.create(**request_kwargs)
+    try:
+        response = client.messages.create(**request_kwargs)
+    except Exception as exc:  # noqa: BLE001 — Anthropic raises several classes
+        return TranslatorResult(
+            output="",
+            rendered_prompt=rendered_prompt,
+            rendered_system=rendered_system,
+            model_used=model,
+            error=f"{type(exc).__name__}: {exc}",
+        )
 
     # Concatenate text blocks (typical case is a single text block).
     text_parts: list[str] = []

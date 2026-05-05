@@ -197,3 +197,34 @@ def test_listener_filters_empty_string_values(document_vertical):
     )
     assert result.answers["audience"] == "execs"
     assert "purpose" in result.missing_required
+
+
+def test_listener_handles_api_error_gracefully(document_vertical):
+    """If the extraction API call raises, the Listener degrades to 'no answers
+    extracted' rather than propagating the exception. Required answers surface
+    as missing_required so the pipeline can recover via clarification."""
+    client = MagicMock()
+    client.messages.create.side_effect = RuntimeError("connection reset")
+    result = run_listener(
+        intent="anything",
+        vertical=document_vertical,
+        client=client,
+    )
+    assert result.error is not None
+    assert "connection reset" in result.error
+    # No answers extracted, so required questions are still missing.
+    assert result.needs_clarification
+    assert set(result.missing_required) == {"audience", "purpose"}
+
+
+def test_listener_marks_tool_definition_cacheable(document_vertical):
+    """The tool definition includes cache_control so Anthropic prompt caching
+    kicks in on repeated calls within the 5-minute TTL."""
+    client = _make_mock_client_returning({})
+    run_listener(
+        intent="anything",
+        vertical=document_vertical,
+        client=client,
+    )
+    tools = client.messages.create.call_args.kwargs["tools"]
+    assert tools[0]["cache_control"] == {"type": "ephemeral"}

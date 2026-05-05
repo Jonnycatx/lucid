@@ -57,6 +57,13 @@ class ListenerResult:
     extracted_from_intent: list[str] = field(default_factory=list)
     """Ids whose answer came from LLM extraction (not pre-provided, not default)."""
 
+    error: Optional[str] = None
+    """If the extraction API call failed, the error message. The Listener
+    degrades gracefully on extraction errors: extracted answers are empty,
+    so any unprovided required answers surface as missing_required. The
+    server may choose to fail the request or proceed depending on whether
+    required answers are still recoverable from caller-provided answers."""
+
     @property
     def needs_clarification(self) -> bool:
         return bool(self.missing_required)
@@ -89,10 +96,18 @@ def run_listener(
 
     # Step 1: Try to extract answers we don't already have.
     extracted: dict[str, Any] = {}
+    extraction_error: Optional[str] = None
     if client is not None:
         unresolved = [q for q in vertical.questions if q.id not in answers_provided]
         if unresolved:
-            extracted = _extract_via_llm(intent, vertical, unresolved, client)
+            try:
+                extracted = _extract_via_llm(intent, vertical, unresolved, client)
+            except Exception as exc:  # noqa: BLE001 — Anthropic raises several classes
+                # Don't crash the pipeline on extraction failure. Treat it as
+                # "no answers extracted": required answers will surface as
+                # clarification requests, which is the safe degradation.
+                extracted = {}
+                extraction_error = f"{type(exc).__name__}: {exc}"
 
     # Step 2: Merge — caller-provided wins over LLM-extracted.
     answers: dict[str, Any] = {**extracted, **answers_provided}
@@ -111,6 +126,7 @@ def run_listener(
         answers=answers,
         missing_required=missing_required,
         extracted_from_intent=[k for k in extracted if k not in answers_provided],
+        error=extraction_error,
     )
 
 
@@ -137,6 +153,10 @@ def _extract_via_llm(
             prop["enum"] = list(q.options)
         properties[q.id] = prop
 
+    # The tool definition is identical across all Listener calls for the same
+    # vertical, so we mark it cacheable. The cache hit lands when the same
+    # vertical is invoked twice within the 5-minute TTL window — common in
+    # multi-turn clarification flows and during eval runs.
     extract_tool = {
         "name": "record_answers",
         "description": (
@@ -151,6 +171,7 @@ def _extract_via_llm(
             # (which surfaces as a clarification request) over a guessed one.
             "required": [],
         },
+        "cache_control": {"type": "ephemeral"},
     }
 
     questions_text = "\n".join(

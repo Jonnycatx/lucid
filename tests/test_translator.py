@@ -138,9 +138,30 @@ def test_translator_passes_system_prompt_to_client(document_vertical, filled_ans
         client=client,
     )
     kwargs = client.messages.create.call_args.kwargs
+    # system is sent as a list of content blocks so prompt caching can be applied
     assert "system" in kwargs
-    assert "strategic communicator" in kwargs["system"]
+    assert isinstance(kwargs["system"], list)
+    system_text = kwargs["system"][0]["text"]
+    assert "strategic communicator" in system_text
+    assert kwargs["system"][0]["cache_control"] == {"type": "ephemeral"}
     assert kwargs["model"] == TRANSLATOR_MODEL
+
+
+def test_translator_returns_error_on_api_failure(document_vertical, filled_answers):
+    """Translator catches API exceptions and surfaces them via .error."""
+    client = MagicMock()
+    client.messages.create.side_effect = RuntimeError("rate limited")
+    result = run_translator(
+        intent="anything",
+        vertical=document_vertical,
+        answers=filled_answers,
+        client=client,
+    )
+    assert result.error is not None
+    assert "rate limited" in result.error
+    assert result.output == ""
+    # Rendered prompt is still populated for debugging.
+    assert result.rendered_prompt
 
 
 def test_translator_passes_rendered_prompt_to_client(document_vertical, filled_answers):
