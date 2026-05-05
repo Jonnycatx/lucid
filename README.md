@@ -1,4 +1,4 @@
-# Lucid &nbsp;·&nbsp; [Install →](https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.skill)
+# Lucid &nbsp;·&nbsp; [Demo](https://jonnycatx.github.io/lucid/) &nbsp;·&nbsp; [Install →](https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.skill)
 
 > The fluency layer between human intent and AI output.
 
