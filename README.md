@@ -150,7 +150,7 @@ Lucid was designed and largely written through pair-programming with [Claude](ht
 
 ## Contributing
 
-Contributions welcome. The easiest meaningful contribution is adding a new vertical: drop a YAML file under `src/lucid/verticals/<your_vertical>/config.yaml` that satisfies the schema in `_schema.py`. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full guide.
+Contributions welcome. The easiest meaningful contribution is adding a new vertical — about ten minutes once you've read [`docs/authoring-a-vertical.md`](docs/authoring-a-vertical.md). See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the broader guide (project philosophy, setup, code style, commit format).
 
 ## License
 

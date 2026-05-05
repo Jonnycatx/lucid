@@ -1,0 +1,161 @@
+# Lucid vertical: code review and refactoring.
+# Specialized vertical for reviewing, refactoring, optimizing, or explaining
+# code. Selected by triage when the user's request mentions refactoring,
+# code review, optimization, Big O, performance, or "explain this code".
+
+id: code.review
+name: Code review and refactor
+description: >
+  Code review, refactoring, performance optimization, and code explanation.
+  Specialized so the prompt template enforces engineering conventions
+  (lead with the code, cite specifics, explain why not just what, preserve
+  correctness) that a generic deliverable template doesn't.
+version: 0.1.0
+
+questions:
+  - id: language
+    prompt: What language is the code (Python, JavaScript, Go, Rust, etc.)?
+    type: text
+    required: false
+    default: (infer from the code)
+    why_it_matters: >
+      Idioms, performance characteristics, and naming conventions are
+      language-specific. A "Pythonic" refactor differs from an idiomatic
+      Go or Rust one.
+
+  - id: priority
+    prompt: What's the priority — readability, performance, correctness, or balanced?
+    type: choice
+    options: [readability, performance, correctness, balanced]
+    required: false
+    default: balanced
+    why_it_matters: >
+      The same code can be refactored three different ways depending on
+      whether the goal is "easier to read", "faster", or "less likely to
+      break". Stating the priority prevents over-optimizing the wrong axis.
+
+  - id: audience
+    prompt: Who's reading the review — junior dev, senior reviewer, non-technical stakeholder?
+    type: text
+    required: false
+    default: another developer (treat as a peer review)
+    why_it_matters: >
+      A junior dev needs more context for each change. A senior reviewer
+      wants terseness and respect for their time. A non-technical
+      stakeholder needs the why translated.
+
+  - id: explanation_depth
+    prompt: How much explanation — terse changelist, full walkthrough, or include Big O reasoning?
+    type: choice
+    options: [terse, full_walkthrough, with_big_o]
+    required: false
+    default: full_walkthrough
+    why_it_matters: >
+      Different audiences and different code complexity levels need
+      different explanation depth. Big O reasoning matters when the
+      refactor changes algorithmic complexity; otherwise it's noise.
+
+  - id: constraints
+    prompt: Any specific requirements (preserve API, no new dependencies, must support Python 3.8, etc.)?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Hidden constraints (preserve a public API, no new dependencies,
+      must support an old runtime, must remain a single file) often
+      eliminate the otherwise-best refactor.
+
+prompt_template: |
+  Review or refactor the code the user provided.
+
+  Language: {language}
+  Priority (correctness vs. readability vs. performance trade-off): {priority}
+  Audience: {audience}
+  Explanation depth: {explanation_depth}
+  Additional constraints: {constraints}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Lead with the code. The refactored, corrected, or annotated code comes
+    first. Explanation comes after. If the user asked for review only (no
+    rewrite), still cite specific lines or identifiers before discussing them.
+  - Be specific. Cite exact line numbers, identifiers, or behaviors. Do not
+    give generic best-practice advice that could apply to any code.
+  - Explain WHY, not just WHAT. Each change must include the reason it
+    improves the code along the stated priority axis. If a change improves
+    algorithmic complexity, name the old and new Big O explicitly.
+  - Preserve correctness. Do not change observable behavior for stylistic
+    gains unless the user asked for behavioral changes.
+  - Match audience. A junior dev gets more context per change. A senior
+    reviewer gets terseness. A non-technical reader gets the why
+    translated and the what summarized.
+  - Match explanation depth. "terse" = bullet list of changes, no prose.
+    "full_walkthrough" = numbered explanation per change. "with_big_o" =
+    include explicit complexity reasoning where relevant.
+  - Respect explicit constraints (preserve APIs, no new dependencies,
+    target runtime version, etc.).
+  - If "Additional constraints" is empty, ignore that line.
+  - Do not include marketing-style filler. No "I hope this helps!" — end
+    when the work ends.
+
+system_prompt: |
+  You are a senior engineer producing code review or refactor output that
+  another senior engineer would approve in a real PR. Lead with the code.
+  Cite specifics. Explain why. Preserve correctness. No filler. No
+  marketing tone. End when the work ends.
+
+output_format: structured
+
+rubric:
+  - id: code_first
+    name: Code first
+    description: The refactored or annotated code precedes the explanation. Discussion cites specific lines or identifiers, not generic principles.
+    weight: 1.0
+
+  - id: specificity
+    name: Specificity
+    description: Cites exact identifiers, lines, behaviors. No generic best-practice advice that could apply to any code.
+    weight: 1.5
+
+  - id: explains_why
+    name: Explains the why
+    description: Each change has a stated reason tied to the priority axis. Big O changes are named explicitly when relevant.
+    weight: 1.0
+
+  - id: correctness_preserved
+    name: Correctness preserved
+    description: No accidental behavior changes. Edge cases the original handled are still handled.
+    weight: 1.5
+
+  - id: audience_calibration
+    name: Audience calibration
+    description: Tone and detail level fit the stated audience and explanation_depth.
+    weight: 1.0
+
+pass_threshold: 0.7
+
+priority: 0
+
+keywords:
+  - refactor
+  - code review
+  - review the following
+  - review this code
+  - optimize this
+  - performance
+  - big o
+  - big-o
+  - clean up this code
+  - rewrite this function
+  - improve this code
+  - explain this code
+  - refactor it for
+
+examples:
+  - "Refactor this Python function for readability and performance"
+  - "Review the following code snippet and identify Big O improvements"
+  - "Explain what this function does and suggest improvements"
+  - "Optimize this loop"
+  - "Code review: what's wrong with this implementation?"

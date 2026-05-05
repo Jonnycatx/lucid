@@ -10,7 +10,7 @@ Thanks for considering a contribution. Lucid is alpha — the architecture is st
 
 ## Easy first contributions
 
-- **Add a new vertical.** Drop a `config.yaml` under `src/lucid/verticals/<your_vertical>/` that satisfies the schema in `src/lucid/verticals/_schema.py`. Add an eval set under `evals/<your_vertical>/`. Open a PR.
+- **Add a new vertical.** Drop a `config.yaml` under `src/lucid/verticals/<your_vertical>/` that satisfies the schema in `src/lucid/verticals/_schema.py`. The full step-by-step is in [`docs/authoring-a-vertical.md`](docs/authoring-a-vertical.md) — about ten minutes if you copy from an existing vertical and specialize. Add representative prompts to `evals/prompts.yaml` so the harness measures your vertical. Open a PR.
 - **Improve an existing vertical's prompt template, rubric, or `why_it_matters` text.** Real-world prompts that produce poor output are the best motivation. Open an issue with the prompt and the bad output, then a PR with the fix.
 - **Improve the Listener's extraction prompt.** If the Listener is missing answers it should reasonably catch from the user's text, that is a prompt improvement.
 - **Documentation.** Examples in the README, docstrings, the build plan — anything that helps the next reader understand the architecture faster.

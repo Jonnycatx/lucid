@@ -184,13 +184,28 @@ def test_run_skill_handles_api_error(doc_prompt):
     assert "rate limited" in out.error
 
 
-def test_run_lucid_handles_non_document_domains_via_fallback(code_prompt):
-    """Non-document prompts now route through the general.fluency fallback,
-    not skipped. With no client, the Translator runs in stub mode, returns
-    the rendered prompt, and the runner reports the run as complete."""
+def test_run_lucid_routes_code_prompt_to_code_review_vertical(code_prompt):
+    """Code prompts route to the specialized code.review vertical (not the
+    fallback). With no client, the Translator runs in stub mode and returns
+    the rendered prompt; the runner reports the run as complete."""
     out = run_lucid(code_prompt, client=None)
     assert out.error is None
     assert out.output  # stub output (rendered prompt) is non-empty
+    assert out.metadata.get("vertical") == "code.review"
+
+
+def test_run_lucid_falls_back_to_general_fluency_when_no_specialized_match():
+    """A prompt with no specialized keywords routes through general.fluency."""
+    misc_prompt = EvalPrompt(
+        id="t.misc",
+        domain="lifestyle",
+        difficulty="easy",
+        key_challenge="test",
+        prompt="Recommend a weekend project for someone learning electronics.",
+    )
+    out = run_lucid(misc_prompt, client=None)
+    assert out.error is None
+    assert out.output
     assert out.metadata.get("vertical") == "general.fluency"
 
 

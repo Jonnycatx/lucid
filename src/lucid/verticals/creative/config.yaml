@@ -1,0 +1,168 @@
+# Lucid vertical: creative writing.
+# Specialized vertical for fiction, short stories, scenes, ad scripts, brand
+# voice, character writing, and similar narrative work. Selected by triage when
+# the user's request contains keywords like "story", "fiction", "scene",
+# "narrative", or "in the style of".
+
+id: creative.story
+name: Creative writing
+description: >
+  Narrative and creative work — short stories, fiction, scenes, ad scripts,
+  brand-voice rewrites, character pieces, worldbuilding. Specialized so the
+  prompt template enforces craft conventions (lead with hook, show don't tell,
+  consistent POV, end on resonance) that a generic deliverable template
+  doesn't.
+version: 0.1.0
+
+questions:
+  - id: genre
+    prompt: What genre or kind of creative work is this?
+    type: text
+    required: false
+    default: (infer from the request)
+    why_it_matters: >
+      Genre sets convention — sci-fi, literary, thriller, romance, fable,
+      ad copy, brand voice — each has different shapes the reader expects.
+      Wrong genre register is the fastest way to break immersion.
+
+  - id: tone
+    prompt: What tone is the work — somber, playful, tense, romantic, satirical, etc.?
+    type: text
+    required: false
+    default: (infer from the request)
+    why_it_matters: >
+      Tone is felt in every sentence. A piece that breaks tone (a joke in a
+      somber piece, a sermon in a playful one) loses the reader.
+
+  - id: length
+    prompt: What length — flash fiction, short story, scene, excerpt, full piece?
+    type: text
+    required: false
+    default: (infer from the request — short story or scene as best fits)
+    why_it_matters: >
+      Length determines pacing and how much can fit. A scene compresses
+      action; a short story has room for arc; flash fiction lives or dies
+      on a single image.
+
+  - id: pov
+    prompt: What point of view — first person, third limited, third omniscient, second person?
+    type: text
+    required: false
+    default: (infer — third person limited unless first person serves the story)
+    why_it_matters: >
+      POV controls the reader's distance from the character and what
+      information they have. Switching POV mid-piece almost always reads
+      as a craft mistake.
+
+  - id: audience
+    prompt: Who is the intended reader?
+    type: text
+    required: false
+    default: general adult readers
+    why_it_matters: >
+      Children's fiction, literary fiction, genre fiction, and ad copy each
+      assume different reader patience and reading vocabulary.
+
+  - id: constraints
+    prompt: Any specific requirements (length cap, must-include elements, things to avoid)?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Hidden constraints (a word cap, a specific opening line, must include
+      a certain image, no profanity) are often the difference between
+      "good piece" and "good piece that doesn't fit the brief."
+
+prompt_template: |
+  Produce the creative work the user requested.
+
+  Genre: {genre}
+  Tone: {tone}
+  Length: {length}
+  Point of view: {pov}
+  Audience: {audience}
+  Additional constraints: {constraints}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Begin in scene or in voice. Never open with a meta-comment, summary, or
+    "Here is a story about..." — the reader is dropped into the work.
+  - Lead with a hook. Earn the reader's attention in the first sentence.
+  - Use concrete sensory detail. Show, do not tell. Specifics beat
+    abstractions every time.
+  - Maintain the chosen point of view consistently. Do not head-hop unless
+    the form (omniscient, multi-POV) explicitly calls for it.
+  - Match tone exactly. A somber piece does not break for jokes; a playful
+    piece does not preach.
+  - Match the genre's structural conventions. A heist needs stakes and a
+    turn. A scene needs a beat. Ad copy needs a hook and a payoff.
+  - End on resonance — an image, a reversal, a beat that lands. Do not tack
+    on a moral or summary.
+  - Respect explicit length and format constraints precisely.
+  - If "Additional constraints" is empty, ignore that line.
+  - Do not summarize, explain, or meta-comment on the work after delivering
+    it. The work stands alone.
+
+system_prompt: |
+  You are a craft-conscious writer producing publishable creative work.
+  Your reader is judging you on every sentence: hook, voice, specificity,
+  tone, ending. Lead with hook. Show, do not tell. Match tone exactly.
+  Cut every line that does not earn its place. Do not explain your work.
+
+output_format: text
+
+rubric:
+  - id: hook
+    name: Opening hook
+    description: First line and first paragraph earn the reader's continued attention. No meta-opening, no summary opening.
+    weight: 1.0
+
+  - id: voice_consistency
+    name: Voice and POV consistency
+    description: Tone and point of view are maintained throughout. No tonal whiplash, no accidental head-hopping.
+    weight: 1.0
+
+  - id: specificity
+    name: Concrete specificity
+    description: Sensory details and concrete particulars rather than abstractions or summary statements.
+    weight: 1.5
+
+  - id: form_match
+    name: Form match
+    description: Structure matches the genre's conventions (arc for stories, beat for scenes, hook + payoff for ad copy, etc.).
+    weight: 1.0
+
+  - id: ending
+    name: Ending
+    description: Closes on resonance — image, reversal, or earned beat. Does not tack on a moral or restate the premise.
+    weight: 1.0
+
+pass_threshold: 0.7
+
+priority: 0
+
+keywords:
+  - story
+  - fiction
+  - scene
+  - narrative
+  - novel
+  - screenplay
+  - character
+  - dialogue
+  - flash fiction
+  - short story
+  - in the style of
+  - brand voice
+  - ad script
+  - ad copy
+  - worldbuild
+
+examples:
+  - "Write a short story about an unreliable narrator on a heist"
+  - "Describe a Cyberpunk-Victorian London marketplace and the items being sold"
+  - "Three 30-second ad scripts targeting burnt-out remote workers"
+  - "Rewrite this product description in the style of Apple"
+  - "I am entering a tavern. Describe the atmosphere and three suspicious NPCs."

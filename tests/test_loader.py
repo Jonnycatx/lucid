@@ -88,6 +88,28 @@ def test_load_registry_includes_fallback():
     assert reg["general.fluency"].is_fallback is True
 
 
+def test_load_registry_includes_specialized_verticals():
+    """Document, creative, and code verticals all load and are non-fallback."""
+    reg = load_registry()
+    for vid in ("document.one_pager", "creative.story", "code.review"):
+        assert vid in reg, f"missing specialized vertical: {vid}"
+        assert reg[vid].is_fallback is False
+
+
+def test_triage_routes_creative_prompt_to_creative_story():
+    """A clearly creative request hits the creative vertical, not fallback."""
+    v = triage("write a short story about an unreliable narrator on a heist")
+    assert v is not None
+    assert v.id == "creative.story"
+
+
+def test_triage_routes_code_prompt_to_code_review():
+    """A clearly engineering request hits the code vertical, not fallback."""
+    v = triage("refactor this Python function for performance and explain Big O")
+    assert v is not None
+    assert v.id == "code.review"
+
+
 def test_triage_priority_tiebreak():
     """When two verticals match equally, higher priority wins."""
     low = Vertical(
