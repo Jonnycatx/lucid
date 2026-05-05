@@ -2,7 +2,7 @@
 
 Living tactical roadmap. Complements [`plan.md`](plan.md) — the plan covers strategic phases (0–5), this file covers concrete items within and across phases. Every item below carries an efficiency case: what it actually saves, unlocks, or measurably improves. Items are written so any contributor can pick one up cold.
 
-Status legend: **NEXT** (do now) · **PARKED** (waiting on dependency) · **BACKLOG** (real but lower priority) · **DEFERRED** (legitimate future work) · **DONE** (shipped — recorded with date and commit).
+Status legend: **NEXT** (do now) · **PARKED** (waiting on dependency) · **BACKLOG** (real but lower priority) · **DEFERRED** (legitimate future work) · **NOT PURSUING** (explicit no) · **DONE** (shipped — recorded with date and commit).
 
 ---
 
@@ -107,14 +107,6 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 
 ## Tier 3 — Public surface and adoption
 
-### 10. Org rename — `lucid-fluency.github.io/lucid` · **PARKED (your action)**
-
-**What.** Create GitHub org `lucid-fluency`, transfer repo, update install/release URLs in `README.md`, `plugin/README.md`, and the demo `docs/index.html`.
-
-**Efficiency case.** `jonnycatx.github.io/lucid` reads as a side project; `lucid-fluency.github.io/lucid` reads as a project with intent. **Trust signal at every link share.** Free.
-
-**Effort.** ~30 min total — your part: 60 sec to create org. My part: transfer + URL updates.
-
 ### 11. PyPI publication (`pip install lucid`) · **DEFERRED to v0.3 release**
 
 **What.** Publish the package on PyPI so `pip install lucid` works without a `git clone` first.
@@ -137,13 +129,11 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 
 *Skill and plugin install paths NOT validated end-to-end (would require Cowork/Claude Desktop) — those remain as separate validation tasks if friction reports come in.*
 
-### 13. Custom domain · **BACKLOG**
+### 13. Custom domain · **NOT PURSUING**
 
-**What.** Buy a domain like `uselucid.dev` or `lucid-fluency.dev`, configure GitHub Pages CNAME.
+**What.** Buy a domain like `uselucid.dev` or `lucid-fluency.dev` and configure GitHub Pages CNAME.
 
-**Efficiency case.** Memorable URL aids word-of-mouth and conference mentions. **Optional polish, not foundational.** Worth the ~$15/yr only after the project earns visibility.
-
-**Effort.** ~30 min · ~$15/yr.
+**Decision 2026-05-05.** Owner has declined this for now. Reasoning: GitHub Pages URL is sufficient for the project's positioning; the brand-name space around "Lucid" is heavily contested (Lucid Motors, Lucid Software, Lucid AI) and the marginal SEO/credibility win doesn't justify ongoing cost or maintenance. Revisit only if traffic patterns specifically suggest a memorable URL is the dropout point.
 
 ### 14. Live API demo on the site · **BACKLOG**
 
@@ -230,12 +220,23 @@ The Validator (Phase 4) is built but only smoke-tested. Run it on real eval prom
 
 ---
 
-## How to use this list
+## Last item — do this last
+
+### 26. Org rename — `lucid-fluency.github.io/lucid` · **PARKED (do at the very end)**
+
+**What.** Create GitHub org `lucid-fluency`, transfer repo, update install/release URLs in `README.md`, `plugin/README.md`, demo `docs/index.html`, and the live GitHub Pages URL.
+
+**Efficiency case.** `jonnycatx.github.io/lucid` reads as a side project; `lucid-fluency.github.io/lucid` reads as a project with intent. Trust signal at every link share. Free except for the rename overhead.
+
+**Why this is last.** Repo transfers create redirect chains for every existing link, release URL, eval-results JSON URL, and screenshot in third-party content. The earlier we do the rename, the more redirects we generate. Doing it after the project has stabilized — eval data published, plugin/skill releases tagged, README links pointing at the v0.3 release — minimizes the redirect blast radius. Also lets us bundle the rename with the v1.0 / launch announcement as one coherent moment.
+
+**Effort.** ~30 min total — owner's part: 60 sec to create the org. Mine: transfer + URL updates across README, plugin README, demo site, and any release-asset URLs.
 
 - **Pick `NEXT` items first.** They're the highest-leverage, no-blocker items.
 - **`PARKED` items have a stated dependency.** Don't unblock them by skipping the dependency.
 - **`BACKLOG` items are real but can wait.** Pick them up when surface-area work matters.
 - **`DEFERRED` items are tracked but not active.** Move to BACKLOG only when they bite.
+- **`NOT PURSUING` items have an explicit "no" decision.** Don't revive without a written reason that overrides the original decision.
 - **Every item should have a concrete efficiency case.** If a new item lacks one, the item is probably speculation.
 
 ## Keeping this list current
@@ -253,4 +254,4 @@ The list is only useful if it stays current. Discipline:
 
 *(Tier 1 items are now `DONE` and remain inline in their tier sections for now. They'll move down to this section once 5+ items have shipped.)*
 
-Last updated: 2026-05-05.
+Last updated: 2026-05-05 (org rename moved to last position; custom domain marked NOT PURSUING).
