@@ -2,7 +2,7 @@
 
 Living tactical roadmap. Complements [`plan.md`](plan.md) — the plan covers strategic phases (0–5), this file covers concrete items within and across phases. Every item below carries an efficiency case: what it actually saves, unlocks, or measurably improves. Items are written so any contributor can pick one up cold.
 
-Status legend: **NEXT** (do now) · **PARKED** (waiting on dependency) · **BACKLOG** (real but lower priority) · **DEFERRED** (legitimate future work).
+Status legend: **NEXT** (do now) · **PARKED** (waiting on dependency) · **BACKLOG** (real but lower priority) · **DEFERRED** (legitimate future work) · **DONE** (shipped — recorded with date and commit).
 
 ---
 
@@ -206,5 +206,20 @@ The Validator (Phase 4) is built but only smoke-tested. Run it on real eval prom
 - **`BACKLOG` items are real but can wait.** Pick them up when surface-area work matters.
 - **`DEFERRED` items are tracked but not active.** Move to BACKLOG only when they bite.
 - **Every item should have a concrete efficiency case.** If a new item lacks one, the item is probably speculation.
+
+## Keeping this list current
+
+The list is only useful if it stays current. Discipline:
+
+1. **When an item ships**, change its status from `NEXT`/`PARKED`/etc. to `DONE` and add a one-line entry under it: `Completed YYYY-MM-DD · [commit-sha](https://github.com/Jonnycatx/lucid/commit/<sha>) · brief note on what changed`.
+2. **Once 5+ DONE items accumulate**, move them en masse to the `## Shipped` section at the bottom (newest first). Keeps the active list scannable.
+3. **When a new item is identified**, add it to the appropriate tier with full structure (What / Efficiency case / Effort) and a starting status. Don't just append a one-liner — items without an efficiency case get culled.
+4. **When a `PARKED` item's dependency clears**, promote it to `NEXT`.
+5. **Update the "Last updated" date** at the bottom each time the list changes.
+6. **Commit punch-list updates with the work they describe**, not as standalone commits — e.g. the commit that ships item #1 should also flip its status to DONE.
+
+## Shipped
+
+*(nothing yet — Tier 1 items are still NEXT. As items complete, move them here from above with their completion line.)*
 
 Last updated: 2026-05-05.
