@@ -380,3 +380,36 @@ prompts:
       AI note-taking app for licensed therapists in private practice.
       Single sentence, follow the "[product] helps [audience] [outcome]
       without [pain]" shape. No fluff.
+
+  # ----- Social media (3) -----------------------------------------------
+
+  - id: social.x_decision_fatigue
+    domain: social
+    difficulty: medium
+    key_challenge: X thread shape, common-myth-vs-reality hook, 10-post pacing
+    prompt: >
+      Write a 10-post X/Twitter thread about why decision fatigue —
+      not time — is the real bottleneck in knowledge work. Use the
+      common-myth-vs-reality hook. Lead post must earn the click in
+      under 280 chars. Subsequent posts should each stand alone but
+      build the argument.
+
+  - id: social.linkedin_status_updates
+    domain: social
+    difficulty: medium
+    key_challenge: LinkedIn structure, contrarian hook, comment-bait close
+    prompt: >
+      Write a LinkedIn post aimed at engineering managers arguing that
+      1:1s should not be status updates. Contrarian hook. Hook in line 1
+      (above the fold). 3-5 short paragraphs. End with a question that
+      invites comments. No hashtag spam.
+
+  - id: social.instagram_mindfulness_launch
+    domain: social
+    difficulty: medium
+    key_challenge: Instagram caption shape, story hook, single CTA
+    prompt: >
+      Write an Instagram caption launching "Stillpoint," a 7-minute
+      mindfulness app for new parents. Use a story hook — open in a
+      specific scene. Hook in line 1 only. Single CTA at the end. 3-5
+      relevant hashtags maximum.

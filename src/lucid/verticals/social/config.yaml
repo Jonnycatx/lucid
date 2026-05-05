@@ -1,0 +1,225 @@
+# Lucid vertical: social media threads and content.
+# Selected by triage when the user asks for an X/Twitter thread, LinkedIn
+# post, Instagram caption, Threads post, or TikTok caption. Specialized so
+# the prompt enforces platform-specific structural conventions and a
+# committed hook style — both are make-or-break for whether the content
+# performs.
+
+id: social.thread
+name: Social Media Threads & Content
+description: >
+  Write platform-native social content — X/Twitter threads, LinkedIn
+  posts, Instagram captions, Threads posts, TikTok captions. Specialized
+  so the output respects per-platform structural conventions (X thread
+  shape vs. LinkedIn post shape vs. Instagram caption shape) and commits
+  to a chosen hook style. Anti-pattern guard against the most common
+  social-content failures: generic openers, numbered-post syndrome,
+  hashtag spam, and "thread emoji" cringe.
+version: 0.1.0
+
+is_fallback: false
+
+questions:
+  - id: platform
+    prompt: Which platform is the content for?
+    type: choice
+    options: [x, linkedin, instagram, threads, tiktok]
+    required: true
+    why_it_matters: >
+      Platform changes everything: length conventions, where the hook
+      lives, line-break behavior, hashtag norms, what reads as authentic
+      vs. cringe. The same idea posted to X vs. LinkedIn vs. Instagram is
+      three different pieces of writing.
+
+  - id: central_claim
+    prompt: What is the central claim, insight, or message?
+    type: text
+    required: true
+    why_it_matters: >
+      Without a single specific claim to anchor the thread, the output
+      becomes a list of generic observations. The claim is what the hook
+      delivers and what the body proves.
+
+  - id: hook_style
+    prompt: What hook style? (Optional — leave on "balanced" to let the model pick.)
+    type: choice
+    options: [common_myth_vs_reality, contrarian, list, story, data, question, balanced]
+    required: false
+    default: balanced
+    why_it_matters: >
+      Hook is 70%+ of whether a thread performs. The same claim with a
+      list hook vs. a contrarian hook vs. a story hook is three different
+      pieces of content. Power users with a clear preference get it; the
+      default lets the model pick the strongest hook for the platform and
+      claim.
+
+  - id: tone
+    prompt: What tone — authoritative, conversational, vulnerable, playful?
+    type: text
+    required: false
+    default: conversational
+    why_it_matters: >
+      Tone shapes voice across every post. A vulnerable thread reads
+      nothing like an authoritative one even when the claim is the same.
+
+  - id: constraints
+    prompt: Any specific length, hashtags, mentions, or content requirements?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Length cap, must-include topics, must-avoid takes, hashtag handling,
+      account voice — all live here. Folded into one field rather than
+      split, since most users specify them inline.
+
+prompt_template: |
+  Write social content for the specified platform.
+
+  Platform: {platform}
+  Central claim: {central_claim}
+  Hook style: {hook_style}
+  Tone: {tone}
+  Additional constraints (length, hashtags, must-include, must-avoid): {constraints}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Match the platform's structural conventions:
+      x → 5-12 posts. Lead post earns the click in under 280 chars and is
+          80% of the work. Each subsequent post stands alone but builds.
+          No "1/" "2/" numbering on every post. No "🧵" or "👇" emoji.
+          Last post can include a soft CTA (follow, reply, share).
+      linkedin → Hook in line 1, visible above the fold. 3-5 short
+                 paragraphs with white space between them. Optional
+                 numbered or bulleted list. End with a sharp takeaway or
+                 a question that invites comments. Hashtags optional and
+                 sparing — no hashtag-stuffing block at the end.
+      instagram → Caption only. Hook in line 1 (the only line shown by
+                  default). Body wrapped tight under the line break. One
+                  clear CTA. 3-5 relevant hashtags max, not 30.
+      threads → Conversational tone. Pacing slower than X — let posts
+                breathe. Less template-driven than X. Avoid X's
+                "thread emoji" conventions; Threads readers find them
+                cringe.
+      tiktok → Caption only (this vertical doesn't write the video
+               script). Hook in 5-8 words. Trend-aware where relevant.
+               Optional CTA. Punchy, not preachy.
+  - Lead with the hook style:
+      common_myth_vs_reality → "Most people think X. The reality is Y."
+                               Lead with the misconception, pivot to the
+                               truth.
+      contrarian → State the conventional take, then reject it. Earn the
+                   reversal in the body.
+      list → "N things I learned about X" / "N reasons Y is wrong" — a
+             specific count, a specific frame.
+      story → Open in a specific scene or moment ("Last Tuesday at 9pm,
+              I noticed..."). The story carries the claim.
+      data → Lead with a single specific number that surprises ("87% of
+             X never Y"). Body unpacks why.
+      question → Open with a sharp question the thread answers. Question
+                 must be specific, not "What if I told you...?"
+      balanced → Pick the strongest hook style for this platform and
+                 claim and commit to it. Do not hedge across multiple.
+  - Be specific. Concrete claims and concrete examples beat generic
+    observations. "I tried this for 6 weeks and lost 3 hours of meetings
+    a week" beats "this saved me time." Cut adjectives like "amazing,"
+    "incredible," "game-changing."
+  - Match tone consistently across every post. A vulnerable thread does
+    not pivot to authoritative mid-way.
+  - End with an action appropriate to the platform — follow/reply/share
+    on X, comment-bait question on LinkedIn, single CTA on Instagram,
+    optional CTA on TikTok.
+  - Never use generic social openers: "🧵 Thread!", "👇 Here's a thread
+    on...", "In this thread, I'll cover...", "Did you know..." — start
+    directly with the hook.
+  - Respect length and constraint requirements precisely.
+  - If "Additional constraints" is empty, ignore that line.
+  - Output the content in the format the platform expects. For X, number
+    the posts ONLY in the output (so the user can see post boundaries) —
+    use "Post 1:", "Post 2:" etc. as headers, NOT "1/" inside the post
+    body. For other platforms, output as a single block.
+  - Do not summarize, explain, or apologize for the content after writing
+    it. Output and stop.
+
+system_prompt: |
+  You write social content that reads as native to the platform it's
+  on. Hook lives in line 1. Specifics beat adjectives. Each platform has
+  its own structural rules — match them. Commit to the chosen hook style
+  rather than hedging. Cut every word that doesn't earn its place. No
+  generic social openers, no thread-emoji cringe, no hashtag spam. Output
+  the content and stop.
+
+output_format: text
+
+rubric:
+  - id: platform_match
+    name: Platform match
+    description: >
+      Output respects the platform's structural conventions — X thread
+      shape, LinkedIn post shape, Instagram caption shape, etc.
+    weight: 1.5
+
+  - id: hook_strength
+    name: Hook strength
+    description: >
+      Lead earns attention and signals the claim. Hook style is
+      recognizable. No generic openers, no buried lead.
+    weight: 1.5
+
+  - id: hook_commitment
+    name: Hook commitment
+    description: >
+      Content commits to the chosen hook style throughout. Doesn't hedge
+      across multiple hook patterns within one piece.
+    weight: 1.0
+
+  - id: specificity
+    name: Specificity
+    description: >
+      Concrete claims, specific examples, real numbers — not generic
+      observations or marketing adjectives.
+    weight: 1.0
+
+  - id: tone_consistency
+    name: Tone consistency
+    description: >
+      Voice and tone consistent across the entire piece. No mid-thread
+      pivots from vulnerable to authoritative or vice versa.
+    weight: 1.0
+
+  - id: action_clarity
+    name: Action clarity
+    description: >
+      Ending matches the platform's expected action shape (comment-bait
+      question on LinkedIn, soft follow/reply CTA on X, single CTA on
+      Instagram, etc.).
+    weight: 0.5
+
+pass_threshold: 0.7
+
+priority: 0
+
+keywords:
+  - twitter thread
+  - x thread
+  - twitter/x thread
+  - linkedin post
+  - linkedin thread
+  - instagram caption
+  - instagram post
+  - tiktok caption
+  - threads post
+  - viral thread
+  - social media thread
+  - social media post
+  - 10-post thread
+  - 5-post thread
+  - write a thread
+
+examples:
+  - "Write a 10-post X thread about why decision fatigue is the real bottleneck in knowledge work, common myth vs reality hook"
+  - "LinkedIn post for engineering managers about why 1:1s shouldn't be status updates"
+  - "Instagram caption for a mindfulness app launch, story hook"
+  - "TikTok caption for a productivity trend video about timeboxing"
+  - "Twitter thread, contrarian, 8 posts, on why most A/B testing is theater"
