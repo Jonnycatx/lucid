@@ -315,3 +315,34 @@ prompts:
       Analyze the current state of Urban Gardening. Based on emerging
       technologies and shifting consumer habits, predict three 'Black Swan'
       events that could radically transform this industry by 2030.
+
+  # ----- Email (3) ------------------------------------------------------
+
+  - id: email.budget_request_ceo
+    domain: email
+    difficulty: medium
+    key_challenge: hierarchical recipient, request structure, lead with ask
+    prompt: >
+      Draft an email to my CEO asking for budget approval on the Q4
+      marketing campaign. Lead with the ask, justify with concrete metrics,
+      propose a specific deadline. Keep it under 150 words.
+
+  - id: email.candidate_decline
+    domain: email
+    difficulty: hard
+    key_challenge: decline structure, warm-but-final tone, must not feel rote
+    prompt: >
+      Write an email to a candidate we interviewed twice declining their
+      application for a senior engineering role. They were strong but we
+      hired internally. Keep it warm but final, and offer to reconnect
+      for future roles.
+
+  - id: email.refund_apology
+    domain: email
+    difficulty: medium
+    key_challenge: apology structure, takes responsibility, offers remediation
+    prompt: >
+      Respond to a customer's email asking for a refund after a billing
+      error charged them twice last month. Apologize plainly, confirm the
+      refund is processed, and explain the one specific change we made to
+      prevent it next time. Do not over-explain.

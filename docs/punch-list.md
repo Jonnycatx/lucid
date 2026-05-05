@@ -218,6 +218,25 @@ The Validator (Phase 4) is built but only smoke-tested. Run it on real eval prom
 
 **Effort when triggered.** ~2 hr · no API cost.
 
+### 27. Vertical expansion: 7-vertical seed batch · **IN PROGRESS**
+
+**What.** Ship 7 high-leverage specialized verticals to bring the total from 4 → 10. Each shipped one at a time with a design-discussion-first flow: agree on dimensions and structure, draft YAML, render sample prompt for sanity, add 2-3 representative eval prompts, commit, move on.
+
+**Efficiency case.** Doubling specialized verticals from 3 → 10 expands the eval surface so the next n=30 batched run actually exercises specialized verticals (today, only ~5 of 30 prompts hit one). Per-vertical lift becomes measurable. Adoption surface grows. Contributor flywheel benefits from a fuller seed.
+
+**Sequence.**
+1. ✅ `email.professional` — completed 2026-05-05 · this commit
+2. ⏳ `marketing.copy`
+3. ⏳ `social.thread`
+4. ⏳ `explain.feynman`
+5. ⏳ `explain.socratic`
+6. ⏳ `analysis.recommendation`
+7. ⏳ `prompt.image`
+
+**Out of scope for the seed batch.** `code.refactor` / `code.explain` will be handled by extending the existing `code.review` vertical (consolidation rather than duplication). High-liability domains (`legal.document.review`, `finance.personal`, `journal.therapy`) deferred to a careful pass with disclaimer patterns. Niche items (`history.whatif`, `puzzle.creation`) deferred until earned demand.
+
+**Effort.** ~10–15 min per vertical for build + render review + eval prompts. ~2 hours total.
+
 ---
 
 ## Last item — do this last

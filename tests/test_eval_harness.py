@@ -41,9 +41,13 @@ from evals.harness import (  # noqa: E402
 # ----- Loading ------------------------------------------------------------
 
 
-def test_prompts_yaml_loads_30_entries():
+def test_prompts_yaml_loads():
+    """The prompts file loads cleanly and contains a reasonable number of
+    entries. The original 30-prompt set has grown as new verticals were
+    added; we don't lock in a specific count so adding eval prompts
+    doesn't require touching this test."""
     prompts = load_prompts(REPO_ROOT / "evals" / "prompts.yaml")
-    assert len(prompts) == 30
+    assert len(prompts) >= 30, "prompts.yaml shouldn't shrink below the original 30-prompt set"
     assert all(isinstance(p, EvalPrompt) for p in prompts)
 
 

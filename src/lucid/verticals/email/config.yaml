@@ -1,0 +1,208 @@
+# Lucid vertical: professional email drafting.
+# Selected by triage when the user asks to draft, write, respond to, or
+# rewrite a professional email. Specialized so the prompt template enforces
+# email-specific craft (subject line, lead with purpose, structure by purpose
+# type, match formality to relationship) that a generic deliverable template
+# doesn't.
+
+id: email.professional
+name: Professional Email Drafting
+description: >
+  Draft, rewrite, and respond to professional emails. Specialized so the
+  output always includes a specific subject line, leads with the email's
+  purpose in the first sentence, and structures the body by the email's
+  purpose type (request, decline, apologize, etc.). Anti-pattern guard
+  against the most common email failures — generic openers, buried asks,
+  wrong formality.
+version: 0.1.0
+
+is_fallback: false
+
+questions:
+  - id: recipient
+    prompt: Who is the email recipient?
+    type: text
+    required: true
+    why_it_matters: >
+      Recipient identity drives tone, formality, length, and how much context
+      to include. Same content for a peer vs. an exec vs. an external client
+      is three different emails. Without this, the email lands wrong even when
+      the words are right.
+
+  - id: purpose
+    prompt: What is the email's primary purpose?
+    type: choice
+    options: [inform, request, respond, decline, apologize, persuade, coordinate]
+    required: true
+    why_it_matters: >
+      Purpose drives the structural shape of the email. A request leads with
+      the ask. A decline leads with the decision. An apology leads with
+      acknowledgment. Choosing the wrong purpose flips the structure, not just
+      the words. Inform covers updates and shares; respond covers replies;
+      coordinate covers scheduling.
+
+  - id: relationship
+    prompt: What's your relationship with the recipient?
+    type: choice
+    options: [cold, professional, collegial, close, hierarchical]
+    required: false
+    default: professional
+    why_it_matters: >
+      Relationship determines greeting (Dear vs. Hi vs. first-name), how much
+      context to include, signature formality, and whether you can skip
+      preamble. Cold = formal opener + signature block. Hierarchical =
+      deferential and tight. Close = direct, drop niceties.
+
+  - id: constraints
+    prompt: Any specific length, tone, or content requirements?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Hidden constraints (must mention something specific, must not exceed
+      X words, must avoid certain language, must include a deadline) are
+      common drivers of an email missing the mark. Tone adjustments beyond
+      the inferred default also live here.
+
+prompt_template: |
+  Draft a professional email.
+
+  Recipient: {recipient}
+  Purpose: {purpose}
+  Relationship: {relationship}
+  Additional constraints: {constraints}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Always include a subject line. Make it specific and signal the email's
+    purpose. "Q4 Marketing Budget Approval Request" beats "Update" or
+    "Quick Question." Generic subjects fail.
+  - Match the greeting to the relationship:
+      cold/hierarchical → "Dear [name],"
+      professional → "Hi [name]," or "Hello [name],"
+      collegial → "Hi [name]," or first name only
+      close → first name only, or no greeting
+  - First sentence after the greeting states the email's purpose. The
+    reader should know why you wrote in under two seconds. Never bury the
+    ask in paragraph three.
+  - Structure the body by purpose:
+      inform → state what changed or what's new, what it means, in 2-4
+               tight sentences
+      request → state the ask, justify in 2-3 sentences, propose the
+                specific next step or deadline
+      respond → acknowledge what they said in one short sentence, then
+                deliver your answer or position
+      decline → state the decision early, give brief reasoning, close with
+                appreciation or an alternative if warranted
+      apologize → take responsibility plainly, state what happened, state
+                  remediation. Do not over-explain or self-flagellate.
+      persuade → lead with the win for the recipient, not your need.
+                 Anticipate one objection.
+      coordinate → propose a specific time/place, offer one or two
+                   alternatives, end with how to confirm
+  - Keep the entire email concise. Say what needs to be said in as few
+    sentences as possible while remaining professional. Decline and
+    apology emails are almost always short. Persuade and inform earn
+    more length only if the substance demands it.
+  - Match formality to relationship throughout — body tone, signature
+    style, level of context-setting.
+  - End with a single, unambiguous call to action. State exactly what
+    you want from the recipient and any deadline. If no action is needed,
+    say so clearly ("No action needed — just keeping you informed").
+  - Never use filler openers such as "I hope this email finds you well,"
+    "Hope you're doing well," "I just wanted to reach out," or "Just
+    checking in." Start directly after the greeting. Cut hedging language
+    ("I just wanted to," "Sorry to bother you," "Hopefully this isn't a
+    problem") wherever it appears.
+  - Sign off appropriately for the relationship. Cold/hierarchical
+    deserves a fuller signature; close colleagues need none.
+  - If "Additional constraints" is empty, ignore that line.
+  - Do not summarize or meta-comment on the email after writing it.
+    Deliver the email and stop.
+
+system_prompt: |
+  You are an experienced professional drafting emails that get read,
+  understood, and acted on. Always produce a specific subject line. State
+  the purpose in the first sentence after the greeting — never bury the
+  ask. Calibrate formality to the relationship. End with a clear call to
+  action or explicit "no action needed." Cut filler ("I hope this finds
+  you well," "I just wanted to") ruthlessly. Sign off appropriately for
+  the relationship. Deliver the email and stop.
+
+output_format: structured
+
+rubric:
+  - id: subject_line
+    name: Subject line quality
+    description: >
+      Subject line is present, specific, and signals the email's purpose.
+      Generic subjects ("Update," "Hi," "Quick question") fail.
+    weight: 1.0
+
+  - id: lead_clarity
+    name: Lead with purpose
+    description: >
+      First sentence after the greeting states the email's purpose. Purpose
+      is not buried in paragraph 2 or 3.
+    weight: 1.5
+
+  - id: formality_match
+    name: Formality match
+    description: >
+      Greeting, body register, and signature fit the stated relationship.
+    weight: 1.0
+
+  - id: action_clarity
+    name: Action clarity
+    description: >
+      Call to action is explicit — what, by when, who acts — or explicitly
+      noted as "no action needed."
+    weight: 1.0
+
+  - id: conciseness
+    name: Conciseness
+    description: >
+      No filler ("I hope this finds you well"), no hedging ("I just wanted
+      to"), no padding. Length appropriate to purpose and relationship.
+    weight: 1.0
+
+  - id: structural_match
+    name: Structural match for purpose
+    description: >
+      Body shape matches the purpose type — request leads with the ask,
+      decline leads with the decision, apology leads with acknowledgment,
+      etc.
+    weight: 1.0
+
+pass_threshold: 0.7
+
+priority: 0
+
+keywords:
+  - draft an email
+  - draft me an email
+  - write an email
+  - write an email to
+  - write me an email
+  - email my
+  - respond to this email
+  - respond to the email
+  - reply to this email
+  - reply to the email
+  - follow-up email
+  - followup email
+  - follow up email
+  - rewrite this email
+  - rewrite the email
+  - send a quick email
+  - email response
+  - email reply
+
+examples:
+  - "draft an email to my CEO asking for budget approval on the Q4 marketing campaign"
+  - "write an email to a candidate declining their application"
+  - "respond to this email from a customer asking for a refund"
+  - "follow-up email to my manager about my 1:1 next week"
+  - "rewrite this email to be more diplomatic"
