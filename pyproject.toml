@@ -51,6 +51,7 @@ Issues = "https://github.com/Jonnycatx/lucid/issues"
 
 [project.scripts]
 lucid = "lucid.server:main"
+lucid-check = "lucid.check:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/lucid"]

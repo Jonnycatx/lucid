@@ -58,10 +58,14 @@ If you're a developer, or you use an MCP client other than Cowork, install the O
 git clone https://github.com/Jonnycatx/lucid.git
 cd lucid
 pip install -e ".[dev]"
-pytest                              # 63 tests, no API key needed
+pytest                              # 91 tests, no API key needed
+lucid-check                         # health check: registry, triage, pipeline
 export ANTHROPIC_API_KEY=sk-ant-... # required for live model calls
+lucid-check --live                  # confirms auth + connectivity
 lucid                               # run the MCP server over stdio
 ```
+
+`lucid-check` is a no-API-needed smoke test that confirms the package is installed correctly, all verticals loaded, triage works, and the pipeline runs end-to-end in stub mode. Pass `--live` once you've set your API key to verify auth.
 
 Use Lucid programmatically:
 
@@ -117,7 +121,7 @@ Add Lucid to Claude Desktop's `claude_desktop_config.json`:
 | Validator layer | Planned (Phase 4) |
 | Memory layer | Planned (Phase 5) |
 
-63 tests passing. CI green across Python 3.10, 3.11, 3.12.
+91 tests passing. CI green across Python 3.10, 3.11, 3.12.
 
 ## Project layout
 
