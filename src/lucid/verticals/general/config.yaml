@@ -1,0 +1,131 @@
+# Lucid universal fallback vertical.
+#
+# This vertical is selected by triage when no specialized vertical's keywords
+# match the user's request. It implements Lucid's four-step protocol
+# (Listen, Clarify, Translate, Validate) without imposing a domain-specific
+# document structure — instead it asks the model to match the form to the
+# deliverable type the user implicitly expects.
+#
+# Specialized verticals (document.*, code.*, creative.*, etc.) override this
+# with domain-tuned questions, prompt templates, and rubrics. New contributors
+# adding a vertical can copy this file as a starting point.
+
+id: general.fluency
+name: Universal Fluency
+description: >
+  Form-agnostic fluency layer for any non-trivial deliverable. Selected when
+  no specialized vertical matches. Captures audience, purpose, and constraints
+  and instructs the execution model to match the form to the deliverable type.
+version: 0.1.0
+
+is_fallback: true
+
+questions:
+  - id: audience
+    prompt: Who is the intended audience for this output?
+    type: text
+    required: false
+    default: the user (general adult audience, no specialized expertise assumed)
+    why_it_matters: >
+      Audience determines tone, jargon, length tolerance, and what assumptions
+      can be left unstated. Same content for an exec vs. a child is two
+      different outputs.
+
+  - id: purpose
+    prompt: What is the desired outcome — what should this make the audience think, feel, or do?
+    type: text
+    required: false
+    default: produce a high-quality version of what was requested
+    why_it_matters: >
+      Purpose shapes structure, the call-to-action, and where the punchline
+      sits. A persuasion piece leads differently from an explainer.
+
+  - id: form
+    prompt: What form does the deliverable take (document, code, story, analysis, explanation, dialogue, list, etc.)?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Form drives structure. A story has a narrative arc; a memo leads with
+      the recommendation; code leads with the code. Mismatching the form is
+      the single biggest cause of generic-feeling output.
+
+  - id: constraints
+    prompt: Any specific length, format, tone, or content requirements?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Hidden constraints (length caps, tone, must-include sections, things to
+      avoid) are the most common cause of an output missing the mark.
+
+prompt_template: |
+  Produce the deliverable the user requested.
+
+  Audience: {audience}
+  Desired outcome: {purpose}
+  Form (if specified): {form}
+  Additional constraints: {constraints}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Match the form to the deliverable type the user implicitly expects.
+    Do not impose document structure on creative work, or creative structure
+    on analysis. If "Form" is empty, infer it from the request.
+  - Lead with what serves the form. Decisions and recommendations lead with
+    the answer. Stories follow narrative arc. Socratic explanations lead
+    with a question. Code leads with the code, then explanation.
+  - Match tone, jargon, and assumed knowledge to the audience.
+  - Respect explicit length and format constraints precisely.
+  - Cut whatever does not serve the stated purpose. No padding.
+  - If "Additional constraints" is empty, ignore that line.
+  - Do not summarize or meta-comment on your own output. Deliver, then stop.
+
+system_prompt: |
+  You are producing a deliverable for a user who described what they want in
+  natural language. The structured spec above captures what they implied but
+  did not explicitly say. Use both the spec and the verbatim request.
+
+  Lead with what serves the form. Be specific and concrete. Match tone to the
+  audience. Cut padding ruthlessly — if a sentence does not earn its place,
+  delete it.
+
+output_format: structured
+
+rubric:
+  - id: intent_fidelity
+    name: Intent fidelity
+    description: Output delivers what the user actually asked for, not a generic version.
+    weight: 1.5
+
+  - id: form_match
+    name: Form match
+    description: The structure matches the deliverable type (story shape for stories, decision shape for memos, code-first for code, etc.).
+    weight: 1.0
+
+  - id: audience_calibration
+    name: Audience calibration
+    description: Tone, jargon, length, and assumed knowledge fit the stated or inferred audience.
+    weight: 1.0
+
+  - id: specificity
+    name: Specificity
+    description: Output is concrete and specific, not generic, padded, or hedged.
+    weight: 1.0
+
+  - id: constraint_compliance
+    name: Constraint compliance
+    description: Explicit constraints (length, format, tone, must-include) are respected exactly.
+    weight: 1.0
+
+pass_threshold: 0.7
+
+# Negative priority ensures specialized verticals always win on tiebreaks.
+priority: -100
+
+# Empty keywords — the fallback is selected only when no other vertical matches.
+keywords: []
+
+examples: []

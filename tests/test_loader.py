@@ -49,10 +49,43 @@ def test_triage_matches_executive_summary():
     assert v.id == "document.one_pager"
 
 
-def test_triage_no_match_returns_none():
-    """A request with no matching keywords returns None."""
+def test_triage_no_match_returns_fallback():
+    """A request with no specialized match returns the fallback vertical."""
     v = triage("what time is it in Tokyo right now")
+    assert v is not None
+    assert v.id == "general.fluency"
+    assert v.is_fallback is True
+
+
+def test_triage_returns_none_when_no_fallback_in_registry():
+    """If a custom registry has no fallback vertical, no_match returns None."""
+    only = Vertical(
+        id="x.only",
+        name="only",
+        description="only",
+        questions=[
+            {"id": "q", "prompt": "p", "type": "text", "why_it_matters": "w"}
+        ],
+        prompt_template="{q}",
+        rubric=[{"id": "r", "name": "r", "description": "r"}],
+        keywords=["foo"],
+    )
+    v = triage("nothing relevant here", registry={only.id: only})
     assert v is None
+
+
+def test_triage_specialized_beats_fallback():
+    """When a specialized vertical matches, the fallback is not selected."""
+    v = triage("write a one-pager for the board")
+    assert v is not None
+    assert v.id == "document.one_pager"
+
+
+def test_load_registry_includes_fallback():
+    """The shipped registry exposes general.fluency as the fallback."""
+    reg = load_registry()
+    assert "general.fluency" in reg
+    assert reg["general.fluency"].is_fallback is True
 
 
 def test_triage_priority_tiebreak():
@@ -117,6 +150,36 @@ def test_triage_score_beats_priority():
     v = triage("foo bar baz", registry=fake_registry)
     assert v is not None
     assert v.id == "x.two"
+
+
+def test_multiple_fallback_verticals_rejected(tmp_path, monkeypatch):
+    """If two verticals both declare is_fallback=True, registry load fails."""
+    from lucid.verticals import _loader
+
+    common = (
+        "questions:\n"
+        "  - id: q\n"
+        "    prompt: p\n"
+        "    type: text\n"
+        "    why_it_matters: w\n"
+        "prompt_template: '{q}'\n"
+        "rubric:\n"
+        "  - id: r\n"
+        "    name: r\n"
+        "    description: r\n"
+        "is_fallback: true\n"
+    )
+    a = tmp_path / "a"
+    b = tmp_path / "b"
+    a.mkdir()
+    b.mkdir()
+    (a / "config.yaml").write_text(f"id: a.fallback\nname: a\ndescription: a\n{common}")
+    (b / "config.yaml").write_text(f"id: b.fallback\nname: b\ndescription: b\n{common}")
+
+    monkeypatch.setattr(_loader, "VERTICALS_DIR", tmp_path)
+    reset_registry_cache()
+    with pytest.raises(ValueError, match="Multiple fallback verticals"):
+        load_registry()
 
 
 def test_invalid_yaml_raises_load_error(tmp_path, monkeypatch):

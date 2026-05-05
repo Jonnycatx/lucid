@@ -184,10 +184,14 @@ def test_run_skill_handles_api_error(doc_prompt):
     assert "rate limited" in out.error
 
 
-def test_run_lucid_skips_non_document_domains_until_universal(code_prompt):
+def test_run_lucid_handles_non_document_domains_via_fallback(code_prompt):
+    """Non-document prompts now route through the general.fluency fallback,
+    not skipped. With no client, the Translator runs in stub mode, returns
+    the rendered prompt, and the runner reports the run as complete."""
     out = run_lucid(code_prompt, client=None)
-    assert out.error is not None
-    assert "universal" in out.error.lower()
+    assert out.error is None
+    assert out.output  # stub output (rendered prompt) is non-empty
+    assert out.metadata.get("vertical") == "general.fluency"
 
 
 def test_run_lucid_uses_vertical_mode_for_document_domain(doc_prompt):

@@ -161,6 +161,11 @@ class Vertical(BaseModel):
         description="Triage tiebreaker. Higher wins when multiple verticals match. "
         "Default 0; reserve higher values for narrow, well-defined verticals.",
     )
+    is_fallback: bool = Field(
+        default=False,
+        description="If True, this vertical is selected by triage when no other "
+        "vertical's keywords match. At most one vertical may be marked fallback.",
+    )
 
     @field_validator("questions")
     @classmethod

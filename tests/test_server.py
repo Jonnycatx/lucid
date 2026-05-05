@@ -112,13 +112,14 @@ def test_run_lucid_calls_real_models_when_client_provided():
     assert client.messages.create.call_count == 2
 
 
-# ----- no_match / unknown_hint paths --------------------------------------
+# ----- fallback / unknown_hint paths --------------------------------------
 
 
-def test_run_lucid_no_match_with_unrelated_intent():
+def test_run_lucid_unrelated_intent_falls_back_to_general_fluency():
+    """When triage finds no specialized match, the universal fallback runs."""
     out = run_lucid("what time is it in Tokyo", client=None)
-    assert out["status"] == "no_match"
-    assert "document.one_pager" in out["available_verticals"]
+    assert out["status"] == "complete"
+    assert out["vertical"]["id"] == "general.fluency"
 
 
 def test_run_lucid_with_explicit_hint_skips_triage():

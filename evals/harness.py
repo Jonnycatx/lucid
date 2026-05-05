@@ -209,54 +209,43 @@ def run_lucid(
 ) -> RunResult:
     """Run the prompt through Lucid's pipeline.
 
-    For domains Lucid's current vertical-mode does not match (anything
-    other than 'document'), this returns a skip marker. The universal
-    Translator (Phase 2 architecture pivot) replaces this branch with a
-    real generative path.
+    Triage selects a specialized vertical when one matches; otherwise the
+    `general.fluency` fallback vertical handles the request. Every prompt
+    therefore gets a real Lucid run — no domain-based skip list.
+
+    If the Listener still surfaces clarification (e.g. a specialized
+    vertical's required questions are unrecoverable from the intent), the
+    eval marks that prompt as skipped — the harness measures one-shot
+    output quality.
     """
     from lucid.server import run_lucid as lucid_pipeline
 
-    # Until the universal Translator lands, force the document vertical
-    # for document-domain prompts and skip everything else.
-    if prompt.domain == "document":
-        result = lucid_pipeline(
-            intent=prompt.prompt,
-            vertical_hint="document.one_pager",
-            client=client,
+    result = lucid_pipeline(intent=prompt.prompt, client=client)
+
+    if result.get("status") == "complete":
+        return RunResult(
+            prompt_id=prompt.id,
+            runner="lucid",
+            output=result["result"],
+            metadata={
+                "model": result.get("model_used", "(stub)"),
+                "vertical": result["vertical"]["id"],
+                "answers_used": result.get("answers_used", {}),
+            },
         )
-        if result.get("status") == "complete":
-            return RunResult(
-                prompt_id=prompt.id,
-                runner="lucid",
-                output=result["result"],
-                metadata={
-                    "model": result.get("model_used", "(stub)"),
-                    "vertical": result["vertical"]["id"],
-                    "answers_used": result.get("answers_used", {}),
-                },
-            )
-        if result.get("status") == "needs_clarification":
-            return RunResult(
-                prompt_id=prompt.id,
-                runner="lucid",
-                output="",
-                error="Lucid asked for clarification but no auto-answer policy defined yet.",
-                metadata={"questions_to_ask": result.get("questions_to_ask", [])},
-            )
+    if result.get("status") == "needs_clarification":
         return RunResult(
             prompt_id=prompt.id,
             runner="lucid",
             output="",
-            error=f"Lucid status: {result.get('status')}",
+            error="Lucid asked for clarification — eval measures one-shot quality.",
+            metadata={"questions_to_ask": result.get("questions_to_ask", [])},
         )
-
-    # Non-document prompts: pending universal Translator.
     return RunResult(
         prompt_id=prompt.id,
         runner="lucid",
         output="",
-        error="pending universal Translator (Phase 2 pivot in progress)",
-        metadata={"reason": "domain not yet handled by vertical mode"},
+        error=f"Lucid status: {result.get('status')}",
     )
 
 

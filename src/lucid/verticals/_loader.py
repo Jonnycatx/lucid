@@ -60,9 +60,11 @@ def load_registry() -> dict[str, Vertical]:
 
     Returns a dict keyed by vertical id. Cached for the lifetime of the process.
     Raises VerticalLoadError on the first invalid vertical encountered.
-    Raises ValueError if two verticals declare the same id.
+    Raises ValueError if two verticals declare the same id, or if more than one
+    vertical is marked is_fallback=True.
     """
     registry: dict[str, Vertical] = {}
+    fallback_id: str | None = None
     for config_path in _iter_vertical_config_paths():
         v = load_vertical(config_path)
         if v.id in registry:
@@ -70,8 +72,23 @@ def load_registry() -> dict[str, Vertical]:
                 f"Duplicate vertical id '{v.id}': "
                 f"{registry[v.id]} and {config_path} both declare it"
             )
+        if v.is_fallback:
+            if fallback_id is not None:
+                raise ValueError(
+                    f"Multiple fallback verticals declared: '{fallback_id}' and "
+                    f"'{v.id}'. Only one vertical may set is_fallback=True."
+                )
+            fallback_id = v.id
         registry[v.id] = v
     return registry
+
+
+def _fallback_vertical(registry: dict[str, Vertical]) -> Vertical | None:
+    """Return the registry's fallback vertical, if one is declared."""
+    for v in registry.values():
+        if v.is_fallback:
+            return v
+    return None
 
 
 def reset_registry_cache() -> None:
@@ -87,7 +104,9 @@ def triage(intent: str, registry: dict[str, Vertical] | None = None) -> Vertical
 
     v0.1 strategy: case-insensitive keyword match. Score each vertical by the
     number of its keywords that appear in the intent string. Tiebreak on
-    `priority` (higher wins). Return None if nothing matches.
+    `priority` (higher wins). If no specialized vertical matches and the
+    registry contains a fallback vertical (is_fallback=True), return it.
+    Return None only if no vertical matches and no fallback is declared.
 
     This will be replaced or augmented by an LLM-driven classifier in a later
     phase, but the keyword version gives us a deterministic, testable baseline.
@@ -100,6 +119,10 @@ def triage(intent: str, registry: dict[str, Vertical] | None = None) -> Vertical
     best_priority = -(10**9)
 
     for v in reg.values():
+        # Fallback verticals don't compete on keyword matching; they're chosen
+        # only when nothing else hits.
+        if v.is_fallback:
+            continue
         score = sum(1 for kw in v.keywords if kw.lower() in needle)
         if score == 0:
             continue
@@ -108,4 +131,6 @@ def triage(intent: str, registry: dict[str, Vertical] | None = None) -> Vertical
             best_score = score
             best_priority = v.priority
 
-    return best
+    if best is not None:
+        return best
+    return _fallback_vertical(reg)
