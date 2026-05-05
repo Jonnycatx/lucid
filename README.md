@@ -19,7 +19,7 @@ See it in action at [**jonnycatx.github.io/lucid**](https://jonnycatx.github.io/
 ## What's in Lucid
 
 - **One-click skill install** — auto-fires on deliverable requests. Zero setup, zero API key, uses your existing Claude session. *Recommended for almost everyone.*
-- **MCP server (advanced)** — full pipeline with fine-grained control: separate Listener / Translator / Validator model selection, prompt caching, multi-turn orchestration. Install via [`lucid.plugin`](https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.plugin) (Cowork) or `pip install` for direct Claude Desktop config. Requires Python 3.10+ and an Anthropic API key.
+- **MCP server (advanced)** — full pipeline with fine-grained control: separate Listener / Translator / Validator model selection, prompt caching, multi-turn orchestration. Install via [`lucid.plugin`](https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.plugin) (Cowork) or `git clone` + `pip install -e .` for direct Claude Desktop config. Requires Python 3.10+ and an Anthropic API key. *(PyPI release with `pip install lucid` ships with v0.3 once eval-gated win-rate is published.)*
 - **Universal fluency protocol** — Listen, Clarify, Translate, Validate. Same protocol whether you install the skill or run the MCP server.
 - **Eval-gated quality** — 30-prompt eval set with position-debiased LLM-as-judge measures Lucid's win rate against the same model with a raw prompt. Every release has to clear the bar.
 - **Open source, auditable** — every line of code, every prompt, every test, every thesis document lives in this repo. MIT-licensed.

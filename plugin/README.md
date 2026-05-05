@@ -24,16 +24,23 @@ This plugin packages the [Lucid MCP server](https://github.com/Jonnycatx/lucid) 
 Lucid runs as a local Python MCP server. You need:
 
 - Python 3.10 or later installed on your machine
-- The `lucid` Python package installed: `pip install lucid` (or `pip install -e .` from the [GitHub repo](https://github.com/Jonnycatx/lucid))
+- The `lucid` Python package installed from source (PyPI release ships with v0.3):
+  ```bash
+  git clone https://github.com/Jonnycatx/lucid.git
+  cd lucid
+  pip install -e .
+  ```
 - An Anthropic API key
 
 A future version of this plugin will bundle the Python dependencies automatically; for now, the install is two steps.
 
 ## Installation
 
-1. Install the Lucid Python package:
+1. Install the Lucid Python package from source:
    ```bash
-   pip install lucid
+   git clone https://github.com/Jonnycatx/lucid.git
+   cd lucid
+   pip install -e .
    ```
 
 2. Install this plugin from the Cowork plugin manager.

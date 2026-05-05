@@ -115,13 +115,17 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 
 **Effort.** ~30 min total — your part: 60 sec to create org. My part: transfer + URL updates.
 
-### 11. PyPI publication (`pip install lucid`) · **BACKLOG**
+### 11. PyPI publication (`pip install lucid`) · **DEFERRED to v0.3 release**
 
-**What.** Publish the package on PyPI so the README's `pip install lucid` line actually works (currently requires `git clone` first).
+**What.** Publish the package on PyPI so `pip install lucid` works without a `git clone` first.
 
-**Efficiency case.** Every developer install today is `git clone` + `cd` + `pip install -e`. PyPI cuts that to one command. **Reduces dev install time from ~3 min to ~30 sec** and removes a known dropout point. Critical once we want to attract third-party MCP-client developers.
+**Efficiency case (when triggered).** Every developer install today is `git clone` + `cd` + `pip install -e .`. PyPI cuts that to one command. Reduces dev install time from ~3 min to ~30 sec.
 
-**Effort.** ~1 hr · no API cost.
+**Why deferred.** The skill (recommended for almost everyone) doesn't need PyPI. The plugin doesn't need PyPI. Only direct-MCP-client users need it, which is a small audience pre-launch. PyPI publication also commits the project to a versioning cycle (no unpublishing, every change needs a version bump). Best done at v0.3 release time alongside measured eval data — one coherent release moment.
+
+**Honesty fix completed 2026-05-05 · this commit.** Dropped misleading `pip install lucid` claims from `plugin/README.md` (two places) and `docs/index.html`. Replaced with explicit `git clone + pip install -e .` instructions. Added "PyPI release ships with v0.3" notes in three places (main README, plugin README, demo site) so readers know it's planned, not abandoned.
+
+**Effort when triggered.** ~1 hr (PyPI account, twine upload, verify install in fresh venv).
 
 ### 12. Fresh-install validation · **DONE**
 
