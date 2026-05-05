@@ -1,61 +1,92 @@
 ---
 name: lucid-fluency
-description: Use Lucid's fluency layer to produce dramatically better output for any non-trivial request. Activates whenever the user asks for a deliverable — documents (one-pagers, briefs, memos, summaries, reports, executive updates), code (refactors, reviews, explanations, optimizations), creative work (stories, ad scripts, brand voice, worldbuilding), analysis (recommendations, pre-mortems, post-mortems, decision memos), explanations (Feynman-style, Socratic), roleplay setups, or any task where output quality depends on how the prompt was framed. Trigger phrases include "write", "draft", "create", "design", "build", "summarize", "analyze", "recommend", "produce a one-pager", "explain like I'm five", "act as", "in the style of", "refactor", "rewrite", "describe". Skip for casual questions, simple lookups, factual recall, or short conversational replies.
+description: Apply Lucid's fluency protocol to produce better output on any non-trivial deliverable. Activates when the user asks for a deliverable — documents (one-pagers, briefs, memos, summaries, reports, executive updates), code (refactors, reviews, explanations, optimizations), creative work (stories, ad scripts, brand voice, worldbuilding, fiction), analysis (recommendations, pre-mortems, post-mortems, decision memos, market reads), explanations (Feynman-style, Socratic, technical-for-non-technical), roleplay or character writing, recipes and lifestyle content, social-media threads, hiring decisions, or any task where output quality depends on how the request was framed. Trigger phrases include "write", "draft", "create", "design", "build", "summarize", "analyze", "recommend", "produce", "explain like I'm five", "act as", "in the style of", "refactor", "rewrite", "describe". Skip for casual questions, simple lookups, factual recall, or short conversational replies.
 ---
 
-# Lucid Fluency
+# Lucid Fluency Protocol
 
-You have access to the `lucid` MCP server, which exposes a `lucid_run` tool. Lucid is the fluency layer between human intent and AI output — it listens for true intent (including unspoken constraints), translates that intent into the optimal prompt for the target model, and returns the result.
+When this skill activates, follow the four-step protocol below before producing the deliverable. The protocol exists because the dominant constraint on AI output quality is the loss of fidelity in the channel between the user's intent and the input the model receives — not what the model can do. The protocol closes that channel.
 
-## When to invoke Lucid
+This skill operates in-place. No external server, no API key beyond the existing Claude session, no separate install.
 
-Invoke Lucid for any non-trivial deliverable request. Examples that should trigger Lucid:
+## When to apply
 
-- "Write a one-pager about Q3 priorities for the board"
-- "Refactor this Python function and explain the changes"
-- "Draft a brief recommending we sunset product X"
-- "Explain quantum entanglement to a 10-year-old, then to a PhD student"
-- "Act as a Senior UX Researcher and critique this onboarding flow"
-- "Create three 30-second ad scripts targeting burnt-out remote workers"
-- "Describe a Cyberpunk-Victorian London marketplace"
-- "Recommend three Black Swan events that could disrupt urban gardening by 2030"
+Apply for any non-trivial deliverable request. Skip for casual questions, factual lookups, conversational chat, or one-line replies. Bias toward applying — the cost of running the protocol when not needed is one possibly-extra clarifying question; the cost of *not* running it when needed is generic output the user has to redo.
 
-Skip Lucid for:
+## The four steps
 
-- Casual questions ("what time is it in Tokyo?")
-- Simple factual lookups ("who won the 2024 World Series?")
-- Conversational chat or one-liner replies
-- Tasks where the answer is clearly a single sentence
+### 1. Listen
 
-## How to invoke Lucid
+Extract the implied dimensions of the request. What is the user trying to accomplish? What did they say, and what did they *not* say but implicitly mean? Different deliverable types have different dimensions:
 
-Call the `lucid_run` tool from the `lucid` MCP server with the user's full request as the `intent` parameter:
+- **Documents** (one-pagers, briefs, memos, summaries): audience, purpose (decision / update / recommendation / briefing), stakes, length and format constraints, hidden requirements such as political context or unstated taboos.
+- **Code**: language and version, performance vs. readability priority, frameworks already in use, whether tests and explanations are expected.
+- **Creative work** (stories, fiction, ad scripts, brand voice): genre, tone, length, target audience, voice references, point of view, structural form (linear, twist, in-medias-res, etc.).
+- **Analysis** (recommendations, pre-mortems, post-mortems, market reads): the decision being made, audience for the analysis, frame (cynical / supportive / balanced), depth, time horizon.
+- **Explanations** (Feynman, Socratic, dual-level): audience expertise, what the audience should be able to do after, prerequisites assumed, whether to use analogies.
+- **Roleplay / character writing**: setting, character voice, target tone, whether the user wants you to drive or to react, the implicit narrative role.
+- **Other deliverable types**: infer the analogous dimensions. The pattern is always — *what would the user have specified if they knew exactly what to ask for?*
 
-```
-lucid_run(intent="<the user's full request, verbatim>")
-```
+### 2. Clarify
 
-Process the response according to its `status` field:
+If a required dimension is missing, ask the user. Use this rule: ask only when the user did not say *and* a different answer would meaningfully change the output. If the answer is genuinely unrecoverable from context, ask. If the answer changes the output by 10 percent, infer and proceed. If the answer changes the output by 50 percent or more, ask.
 
-**`status: "complete"`** — Lucid produced an output. Present the `result` field to the user as the answer. Do not paraphrase or shorten. Lucid already optimized the output for the user's intent.
+When asking, prefer one or two pointed questions framed so the user sees why the answer matters:
 
-**`status: "needs_clarification"`** — Lucid needs more information before it can produce a high-quality output. The `questions_to_ask` field contains the questions. Surface those questions to the user one at a time (or batched if natural), get their answers, then call `lucid_run` again with the answers in the `answers` parameter:
+> Quick question before I draft: who's reading this — the board, the leadership team, or the broader company? The shape of the document changes a lot based on the answer.
 
-```
-lucid_run(intent="<original intent>", answers={"audience": "...", "purpose": "..."})
-```
+Not:
 
-**`status: "no_match"`** — The request did not match any known Lucid vertical. Fall through to a normal response without Lucid. Do not surface the no_match status to the user.
+> What is the audience?
 
-**`status: "unknown_hint"` or other errors** — Treat as `no_match`. Fall through to a normal response.
+Don't interrogate. If three or more dimensions are unclear, surface only the two that matter most.
 
-## What not to do
+### 3. Translate
 
-- Do not paraphrase Lucid's output. Present `result` verbatim.
-- Do not invoke Lucid for casual questions or simple lookups — the latency isn't worth it.
-- Do not surface internal Lucid statuses ("status: complete", "vertical: document.one_pager") to the user. The user sees the answer, not the plumbing.
-- Do not skip the clarification step. If Lucid asks for clarification, ask the user — that's the whole point of the fluency loop.
+Construct the response from the structured spec, not from the raw request. The shape of "lead with the answer" depends on the deliverable type:
+
+- For documents, decision memos, and analytical recommendations: lead with the recommendation or the punchline.
+- For code: provide the refactored or implemented code first, then explanation.
+- For creative work, fiction, and roleplay: follow the form — leading with the ending ruins a story. Use the structure the genre expects.
+- For Socratic explanations: lead with a question, not the answer.
+- For two-level Feynman explanations: do the simple version first, then the technical version.
+
+Match tone, jargon, and assumed knowledge to the inferred audience. Respect explicit length and format constraints precisely. Cut whatever does not serve the stated purpose; padding hurts.
+
+### 4. Validate
+
+Before delivering, self-check against the spec. Ask:
+
+- Does it deliver on the user's stated intent?
+- Does it respect the implicit constraints you inferred or asked about?
+- Is the form (length, structure, format) appropriate for the deliverable type?
+- Is it specific and concrete, not generic?
+- Would the inferred audience actually find it useful?
+
+Be honest about a real limitation: self-validation in the same call is less reliable than a separate validator. The MCP-server version of Lucid (the advanced install) runs a separate Validator pass with re-runs on miss. The skill version cannot. So in this skill, treat self-validation as a quality floor — catch obvious failures (missing sections, wrong audience tone, off-target length) — not as a guarantee. If a check obviously fails, revise.
+
+## How to deliver
+
+Present the output cleanly. If you asked clarifying questions, briefly note the spec at the top so the user sees the questions paid off:
+
+> Based on this being for the leadership team and the goal being a decision on the EU launch, here's the one-pager:
+
+If you inferred dimensions without asking, don't surface them — just produce the output.
+
+Never paraphrase or summarize your own output to the user. The fluency lift comes from structured generation, not from meta-commentary about it.
+
+## Multi-turn shape
+
+If clarification was needed, the protocol naturally produces a multi-turn flow: the user asks, you ask one or two sharp questions, the user answers, you produce the output. Don't collapse this into a single turn by guessing at missing answers. Don't extend it past two clarifying questions in turn 2.
+
+## What this skill is *not*
+
+It is not a script the user reads. It is internal scaffolding for *your* generation. The user should experience: they made a request, you sometimes asked one sharp question, you delivered an unusually good output. Nothing more.
+
+It is not about being verbose. The protocol compresses intent into structured generation; it does not pad the output with meta-commentary.
+
+It is not a guarantee. It is a floor that lifts median output quality. The advanced MCP-server version of Lucid does more — separate Listener model, prompt caching, separate Validator pass, persistent memory. The skill version trades those for zero setup. Both encode the same protocol; the MCP version measures and re-runs more rigorously.
 
 ## Why this matters
 
-Lucid is the difference between a vague prompt that produces generic output and a structured prompt that produces production-quality output. Users do not have to learn how to prompt — Lucid does it for them. Every time you invoke Lucid on a deliverable request, the user gets output that is measurably better than what the same model would produce from the raw prompt alone.
+The user does not have to learn how to prompt. The protocol does it for them. Each application turns a vague request into a structured spec, which produces measurably better output than the raw request would have — using the same model. The dominant constraint on AI usefulness is not capability; it is the medium between the human and the model. This protocol is the medium, made fluent.
