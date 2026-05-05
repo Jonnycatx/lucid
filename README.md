@@ -47,7 +47,7 @@ Lucid runs custom orchestration over four layers.
 |---|---|
 | **Listener** | Extracts true intent — including unspoken constraints — from the user's request. Runs on Haiku. |
 | **Translator** | Converts intent into the prompt shape the target model performs best on. Runs on Sonnet 4.6 by default. |
-| **Validator** | Grades output against intent and re-runs on miss. *(Phase 4)* |
+| **Validator** | Grades output against the vertical's rubric and re-runs the Translator once on miss. Opt-in via `validate=True`. |
 | **Memory** | Accumulates a persistent model of the user across sessions. *(Phase 5)* |
 
 ## For developers and other MCP clients
@@ -118,10 +118,10 @@ Add Lucid to Claude Desktop's `claude_desktop_config.json`:
 | Cowork plugin packaging | Done |
 | Eval harness (30 prompts, position-debiased LLM judge) | Done |
 | Phase 2 closure: measured win rate vs. baseline | In progress |
-| Validator layer | Planned (Phase 4) |
+| Validator layer (rubric grading + one-rerun budget) | Done — opt-in via `validate=True` |
 | Memory layer | Planned (Phase 5) |
 
-91 tests passing. CI green across Python 3.10, 3.11, 3.12.
+101 tests passing. CI green across Python 3.10, 3.11, 3.12.
 
 ## Project layout
 

@@ -140,6 +140,102 @@ def test_run_lucid_with_unknown_hint():
     assert "document.one_pager" in out["available_verticals"]
 
 
+# ----- validator integration ---------------------------------------------
+
+
+def test_run_lucid_with_validate_false_omits_validation_block():
+    """validate=False (default) means no validation block in the response."""
+    out = run_lucid(
+        "should we sunset product X?",
+        vertical_hint="document.one_pager",
+        answers={"audience": "execs", "purpose": "decision"},
+        client=None,
+    )
+    assert out["status"] == "complete"
+    assert "validation" not in out
+    assert "rerolled" not in out
+
+
+def test_run_lucid_with_validate_true_includes_validation_block_in_stub_mode():
+    """validate=True with no client returns a stub validation block (passed=None)."""
+    out = run_lucid(
+        "should we sunset product X?",
+        vertical_hint="document.one_pager",
+        answers={"audience": "execs", "purpose": "decision"},
+        validate=True,
+        client=None,
+    )
+    assert out["status"] == "complete"
+    assert "validation" in out
+    assert out["validation"]["passed"] is None  # stub mode
+    assert out["validation"]["model_used"] == "(stub)"
+    assert out["validation"]["pass_threshold"] == 0.7
+    # Stub re-roll is not triggered (passed is None, not False).
+    assert out["rerolled"] is False
+
+
+def test_run_lucid_validator_triggers_reroll_when_first_attempt_fails():
+    """When validate=True and the first output scores below threshold, the
+    Translator runs again. If the re-roll scores higher, it replaces the
+    original; rerolled=True is reported."""
+    # Mock client where:
+    #   - Translator calls return text outputs in sequence
+    #   - Validator calls return: first score 0.3 (below 0.7), then 0.9 (above)
+    client = MagicMock()
+    call_log: list[dict] = []
+
+    def fake_create(**kwargs):
+        call_log.append(kwargs)
+        # If a tool named grade_output is requested, return a grading.
+        tools = kwargs.get("tools") or []
+        is_grade = any(t.get("name") == "grade_output" for t in tools)
+        if is_grade:
+            grade_call_index = sum(
+                1 for c in call_log[:-1]
+                if any((t.get("name") == "grade_output") for t in (c.get("tools") or []))
+            )
+            score = 0.3 if grade_call_index == 0 else 0.9
+            tool_use = MagicMock()
+            tool_use.type = "tool_use"
+            tool_use.name = "grade_output"
+            tool_use.input = {
+                "structure":         {"score": score, "reasoning": "x"},
+                "length":            {"score": score, "reasoning": "x"},
+                "tone_match":        {"score": score, "reasoning": "x"},
+                "action_clarity":    {"score": score, "reasoning": "x"},
+                "evidence_quality":  {"score": score, "reasoning": "x"},
+            }
+            resp = MagicMock()
+            resp.content = [tool_use]
+            return resp
+        # Otherwise it's a Translator (or Listener) call — return a text block.
+        text_block = MagicMock(type="text")
+        translator_call_index = sum(
+            1 for c in call_log[:-1]
+            if not any((t.get("name") in ("grade_output", "record_answers"))
+                       for t in (c.get("tools") or []))
+        )
+        text_block.text = f"output v{translator_call_index + 1}"
+        resp = MagicMock()
+        resp.content = [text_block]
+        return resp
+
+    client.messages.create.side_effect = fake_create
+
+    out = run_lucid(
+        "should we sunset product X?",
+        vertical_hint="document.one_pager",
+        answers={"audience": "execs", "purpose": "decision"},
+        validate=True,
+        client=client,
+    )
+    assert out["status"] == "complete"
+    assert out["rerolled"] is True
+    assert out["result"] == "output v2"
+    assert out["validation"]["passed"] is True
+    assert out["validation"]["weighted_score"] == pytest.approx(0.9)
+
+
 # ----- error path (Translator API failure) --------------------------------
 
 

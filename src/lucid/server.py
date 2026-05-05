@@ -33,6 +33,7 @@ from mcp.server.fastmcp import FastMCP
 
 from lucid.listener import run_listener
 from lucid.translator import run_translator
+from lucid.validator import run_validator
 from lucid.verticals._loader import load_registry, triage
 from lucid.verticals._schema import Vertical
 
@@ -52,6 +53,26 @@ def _vertical_summary(v: Vertical) -> dict[str, Any]:
         "name": v.name,
         "version": v.version,
         "output_format": v.output_format.value,
+    }
+
+
+def _validator_summary(verdict: Any) -> dict[str, Any]:
+    """JSON-serializable summary of a ValidatorResult."""
+    return {
+        "weighted_score": round(verdict.weighted_score, 3),
+        "passed": verdict.passed,
+        "pass_threshold": verdict.pass_threshold,
+        "model_used": verdict.model_used,
+        "scores": [
+            {
+                "id": s.id,
+                "score": round(s.score, 3),
+                "weight": s.weight,
+                "reasoning": s.reasoning,
+            }
+            for s in verdict.scores
+        ],
+        "error": verdict.error,
     }
 
 
@@ -85,6 +106,7 @@ def run_lucid(
     vertical_hint: Optional[str] = None,
     answers: Optional[dict[str, Any]] = None,
     *,
+    validate: bool = False,
     client: Optional["Anthropic"] = None,
 ) -> dict[str, Any]:
     """Run the full Lucid pipeline.
@@ -92,6 +114,12 @@ def run_lucid(
     The MCP-decorated `lucid_run` tool delegates to this function, supplying
     a default client built from ANTHROPIC_API_KEY. Tests bypass the env var
     by passing client= directly.
+
+    If `validate=True`, the Validator grades the Translator's output against
+    the vertical's rubric. If the weighted score is below the vertical's
+    pass_threshold, the Translator is invoked once more (a single re-roll
+    budget). The final result includes the Validator verdict either way so
+    callers can surface scores or diagnose grader misses.
     """
     registry = load_registry()
 
@@ -179,7 +207,42 @@ def run_lucid(
             "listener_error": listener.error,
         }
 
-    return {
+    # Validator (optional): grade the output and re-run on miss.
+    validator_verdict = None
+    rerolled = False
+    if validate:
+        validator_verdict = run_validator(
+            intent=intent,
+            vertical=vertical,
+            rendered_prompt=translator.rendered_prompt,
+            output=translator.output,
+            client=client,
+        )
+        # Only re-roll on a *real* fail (passed=False). passed=None means
+        # grading was skipped or errored — re-rolling on that wouldn't be
+        # justified, since we have no actual signal.
+        if validator_verdict.passed is False:
+            rerun = run_translator(
+                intent=intent,
+                vertical=vertical,
+                answers=listener.answers,
+                client=client,
+            )
+            if rerun.error is None:
+                # Re-grade the re-roll. The caller sees the better-of-two.
+                rerun_verdict = run_validator(
+                    intent=intent,
+                    vertical=vertical,
+                    rendered_prompt=rerun.rendered_prompt,
+                    output=rerun.output,
+                    client=client,
+                )
+                if rerun_verdict.weighted_score >= validator_verdict.weighted_score:
+                    translator = rerun
+                    validator_verdict = rerun_verdict
+                    rerolled = True
+
+    response: dict[str, Any] = {
         "status": "complete",
         "intent": intent,
         "vertical": _vertical_summary(vertical),
@@ -190,6 +253,10 @@ def run_lucid(
         "rendered_prompt": translator.rendered_prompt,
         "listener_error": listener.error,
     }
+    if validator_verdict is not None:
+        response["validation"] = _validator_summary(validator_verdict)
+        response["rerolled"] = rerolled
+    return response
 
 
 # ----- MCP-exposed tool ---------------------------------------------------
@@ -200,6 +267,7 @@ def lucid_run(
     intent: str,
     vertical_hint: Optional[str] = None,
     answers: Optional[dict[str, str]] = None,
+    validate: bool = False,
 ) -> dict[str, Any]:
     """Run the Lucid fluency layer on a user request.
 
@@ -208,19 +276,25 @@ def lucid_run(
       vertical_hint: Optional vertical id to use directly, bypassing triage.
       answers: Optional pre-filled answers (used after a prior call returned
         status='needs_clarification' and the user supplied the missing info).
+      validate: If True, grade the output against the vertical's rubric and
+        re-run the Translator once if the score falls below the threshold.
+        Adds latency and one extra model call (or two if the re-roll fires).
 
     Returns:
       A structured dict with one of these statuses:
-        - 'complete': pipeline ran end-to-end; .result holds the output
+        - 'complete': pipeline ran end-to-end; .result holds the output.
+          When validate=True, also includes .validation with per-criterion
+          scores and .rerolled (bool).
         - 'needs_clarification': Listener needs more info; .questions_to_ask
           holds what to ask the user
-        - 'no_match': triage found no fitting vertical
+        - 'error': the Translator API call failed; .error holds the message
         - 'unknown_hint': vertical_hint did not match a known vertical
     """
     return run_lucid(
         intent=intent,
         vertical_hint=vertical_hint,
         answers=answers,
+        validate=validate,
         client=_make_default_client(),
     )
 
