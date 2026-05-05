@@ -42,7 +42,7 @@ See it in action at [**jonnycatx.github.io/lucid**](https://jonnycatx.github.io/
 git clone https://github.com/Jonnycatx/lucid.git
 cd lucid
 pip install -e ".[dev]"
-pytest                              # 101 tests, no API key needed
+pytest                              # 102 tests, no API key needed
 lucid-check                         # health check: registry, triage, pipeline
 export ANTHROPIC_API_KEY=sk-ant-... # required for live model calls
 lucid-check --live                  # confirms auth + connectivity
@@ -121,7 +121,7 @@ Four layers between your request and the model.
 | Measured win rate vs. baseline | In progress |
 | Memory layer | Planned (Phase 5) |
 
-**101 tests passing.** CI green on Python 3.10 / 3.11 / 3.12.
+**102 tests passing.** CI green on Python 3.10 / 3.11 / 3.12.
 
 ## Read more
 

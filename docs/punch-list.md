@@ -123,13 +123,15 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 
 **Effort.** ~1 hr · no API cost.
 
-### 12. Fresh-install validation · **BACKLOG**
+### 12. Fresh-install validation · **DONE**
 
-**What.** On a fresh machine or fresh venv, follow the README install flow exactly — skill download, plugin install, dev install. Document and fix any friction.
+*Completed 2026-05-05 · this commit · Followed the README dev-install flow on a fresh venv at `/tmp/lucid-fresh-install/`. The install itself was clean — `pip install -e ".[dev]"`, `pytest` (102 passed), and `lucid-check` all worked first try. But the validation surfaced three real friction items, all fixed in this commit:*
 
-**Efficiency case.** We've never validated the documented install path. Friction here = silent dropouts we never observe. **Catches missing dependencies, broken steps, or ambiguous instructions before users hit them.**
+- *Version mismatch: `pyproject.toml` and `src/lucid/__init__.py` said `0.1.0` while README, demo site, and project narrative all say v0.2 / v0.3. New developer running `lucid-check` saw "version 0.1.0" while the README said v0.2 — confusing first impression. Bumped both to `0.2.0`.*
+- *Stale test count: README said "101 tests passing" in two places; actual count is 102 (we added the underscore-prefix test in commit `0effd3b`). Updated.*
+- *Stray `pytest-cache-files-xpp7ys4_` directory was sitting in the working tree (created by deepeval test runs). Not tracked, but easy to accidentally commit. Added `pytest-cache-files-*/` to .gitignore.*
 
-**Effort.** ~30 min · no API cost.
+*Skill and plugin install paths NOT validated end-to-end (would require Cowork/Claude Desktop) — those remain as separate validation tasks if friction reports come in.*
 
 ### 13. Custom domain · **BACKLOG**
 
