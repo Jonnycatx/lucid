@@ -512,8 +512,9 @@ def cli_compare(args: argparse.Namespace) -> int:
             json.dump(
                 {
                     "report": asdict(report),
+                    "runner": runner_name,
                     "baseline": {k: asdict(v) for k, v in baseline_runs.items()},
-                    "lucid": {k: asdict(v) for k, v in lucid_runs.items()},
+                    "treatment": {k: asdict(v) for k, v in treatment_runs.items()},
                 },
                 f,
                 indent=2,
