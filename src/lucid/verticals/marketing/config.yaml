@@ -1,0 +1,220 @@
+# Lucid vertical: marketing and ad copy.
+# Selected by triage when the user asks to write ads, landing pages,
+# slogans, value props, marketing emails, or short ad scripts. Specialized
+# so the prompt template enforces format-specific structure (ad copy is
+# ad-shaped, landing copy is landing-shaped, slogan length is slogan length)
+# and angle-specific hook craft.
+
+id: marketing.copy
+name: Marketing & Ad Copy
+description: >
+  Write ads, landing pages, marketing emails, social copy, slogans, value
+  propositions, and short ad scripts. Specialized so the output respects
+  format-specific length and structure conventions, leads with a hook
+  calibrated to the chosen angle, and uses concrete specific claims rather
+  than generic marketing speak.
+version: 0.1.0
+
+is_fallback: false
+
+questions:
+  - id: product_or_offer
+    prompt: What is the product, service, or offer being marketed?
+    type: text
+    required: true
+    why_it_matters: >
+      Without knowing what's being sold, copy collapses into generic
+      "here's a great thing" filler. The product name, the specific
+      benefit it delivers, and what makes it different from alternatives
+      are what give copy traction.
+
+  - id: format
+    prompt: What format is the copy?
+    type: choice
+    options: [ad, landing_page, email_subject, social_post, slogan, value_prop, script]
+    required: true
+    why_it_matters: >
+      Format dictates length, structure, and pacing. A landing page hero
+      is not a Google ad is not an email subject is not a billboard.
+      Picking the wrong format produces copy that's the wrong shape for
+      the channel, no matter how good the words are.
+
+  - id: audience
+    prompt: Who is the target audience? Be specific (not "consumers" — "burnt-out remote workers in their 30s").
+    type: text
+    required: true
+    why_it_matters: >
+      Audience determines vocabulary, references, pain points, aspirations,
+      and what social proof carries weight. Generic audiences ("everyone")
+      produce generic copy. Specific personas produce copy that lands.
+
+  - id: angle
+    prompt: What persuasion angle? (Optional — leave on "balanced" to let the model pick the strongest angle for the offer.)
+    type: choice
+    options: [fomo, aspiration, logic, social_proof, contrarian, transformation, fear, balanced]
+    required: false
+    default: balanced
+    why_it_matters: >
+      The same product gets sold five different ways depending on the
+      angle. FOMO copy looks nothing like logic copy. Picking the wrong
+      angle for the audience or the product is a common cause of copy
+      that's well-written but doesn't convert.
+
+  - id: constraints
+    prompt: Any specific length, brand voice, must-include, or must-avoid requirements?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Brand voice (cheeky, corporate, minimal, warm), word/character caps,
+      legal must-includes, and competitive must-avoids are common drivers
+      of copy missing the mark. Folded into one field rather than split,
+      since most users specify them inline.
+
+prompt_template: |
+  Write marketing copy.
+
+  Product or offer: {product_or_offer}
+  Format: {format}
+  Audience: {audience}
+  Angle: {angle}
+  Additional constraints (brand voice, length, must-include, must-avoid): {constraints}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Match the format's structural conventions and length:
+      ad → opening hook (one line that earns attention), one specific
+           benefit, one clear CTA. Usually under 40 words.
+      landing_page → bold hero claim, 3-5 supporting points (each with a
+                     concrete benefit, not a generic adjective), one
+                     primary CTA, brief social proof or trust signal.
+      email_subject → one line, under 50 characters, must earn the open.
+                      No clickbait that the email can't deliver on.
+      social_post → platform-appropriate length (X = under 280; LinkedIn
+                    = 3-5 short paragraphs; Instagram caption = hook +
+                    body + CTA). Hook in line one.
+      slogan → 3-7 words, memorable, distinctive, says something specific
+               about the product (not generic praise).
+      value_prop → one sentence: "[product] helps [audience] [outcome]
+                   without [pain]" or close variant. No fluff.
+      script → opening hook, single narrative arc, payoff, CTA at the
+               end. Specify scene/timing if relevant.
+  - Lead with a hook calibrated to the chosen angle:
+      fomo → what they're missing or what's already happening without them
+      aspiration → who they could become / what they could have
+      logic → specific math, comparison, or measurable claim
+      social_proof → who else is already doing this
+      contrarian → reject the conventional take, propose the new one
+      transformation → before/after, or the moment of change
+      fear → the specific cost of inaction
+      balanced → pick the strongest angle for this product/audience and
+                 commit to it; do not hedge across multiple angles
+  - Be specific. Concrete claims beat generic marketing adjectives every
+    time. "Cuts onboarding time from 3 weeks to 2 days" beats "blazing
+    fast onboarding." "Used by 12 of the Fortune 100" beats "trusted by
+    industry leaders." "Revolutionary," "cutting-edge," "world-class,"
+    "next-generation" — cut these wherever they appear.
+  - Match audience language. Use the vocabulary, references, and pain
+    points of the stated persona. If the audience is technical, use
+    technical specifics. If the audience is hurried executives, lead with
+    the bottom line.
+  - Commit to the angle. Don't hedge across multiple angles in one piece
+    of copy — pick one and execute it well.
+  - End with a single, clear desired action. Click? Sign up? Buy? Watch?
+    Email? Tell the reader what to do next, in plain language, without
+    hedging ("you might want to consider..." → "Start free →").
+  - Respect length and brand voice constraints precisely. If a 30-word
+    cap is stated, count.
+  - If "Additional constraints" is empty, ignore that line.
+  - Do not summarize, explain, or apologize for the copy after delivering
+    it. Output the copy and stop.
+
+system_prompt: |
+  You are a craft-conscious marketing copywriter producing copy that ships
+  and converts. Concrete claims beat generic marketing adjectives. Lead
+  with the hook the angle demands. Match length and structure to the
+  format. Match language and references to the audience. End with a
+  single clear action. Cut every word that does not earn its place. Do
+  not explain or summarize the copy.
+
+output_format: text
+
+rubric:
+  - id: format_match
+    name: Format match
+    description: >
+      Output respects the format's structural and length conventions
+      (ad copy is ad-shaped, landing copy is landing-shaped, slogan is
+      slogan length, etc.).
+    weight: 1.5
+
+  - id: hook_strength
+    name: Hook strength
+    description: >
+      Opening line earns attention and signals the angle. No generic
+      openers, no buried lead.
+    weight: 1.0
+
+  - id: angle_commitment
+    name: Angle commitment
+    description: >
+      Copy commits to the chosen angle rather than hedging across
+      multiple. The angle is recognizable in the language and the
+      structure.
+    weight: 1.0
+
+  - id: audience_fit
+    name: Audience fit
+    description: >
+      Vocabulary, references, and pain points are calibrated to the
+      stated audience persona, not generic.
+    weight: 1.0
+
+  - id: specificity
+    name: Specificity
+    description: >
+      Concrete claims and particulars rather than generic marketing
+      adjectives ("revolutionary," "world-class," "cutting-edge").
+    weight: 1.5
+
+  - id: action_clarity
+    name: Action clarity
+    description: >
+      Single, clear, unhedged desired action. The reader knows exactly
+      what to do next.
+    weight: 1.0
+
+pass_threshold: 0.7
+
+priority: 0
+
+keywords:
+  - ad copy
+  - landing page
+  - landing page copy
+  - marketing copy
+  - marketing email
+  - email subject line
+  - social media ad
+  - facebook ad
+  - google ad
+  - instagram caption
+  - linkedin post
+  - slogan
+  - tagline
+  - value prop
+  - value proposition
+  - sales page
+  - ad script
+  - ad scripts
+  - write copy for
+  - write an ad
+
+examples:
+  - "Write three 30-second ad scripts targeting burnt-out remote workers"
+  - "Landing page hero copy for a B2B analytics tool aimed at engineering managers"
+  - "Five Google Ads variants for a meal-prep service, FOMO angle"
+  - "Tagline for a sustainable activewear brand"
+  - "Value proposition for a HIPAA-compliant note-taking app for therapists"

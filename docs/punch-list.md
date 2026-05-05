@@ -225,8 +225,8 @@ The Validator (Phase 4) is built but only smoke-tested. Run it on real eval prom
 **Efficiency case.** Doubling specialized verticals from 3 → 10 expands the eval surface so the next n=30 batched run actually exercises specialized verticals (today, only ~5 of 30 prompts hit one). Per-vertical lift becomes measurable. Adoption surface grows. Contributor flywheel benefits from a fuller seed.
 
 **Sequence.**
-1. ✅ `email.professional` — completed 2026-05-05 · this commit
-2. ⏳ `marketing.copy`
+1. ✅ `email.professional` — completed 2026-05-05 · commit `802dbfe`
+2. ✅ `marketing.copy` — completed 2026-05-05 · this commit
 3. ⏳ `social.thread`
 4. ⏳ `explain.feynman`
 5. ⏳ `explain.socratic`

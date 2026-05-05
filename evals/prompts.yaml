@@ -346,3 +346,37 @@ prompts:
       error charged them twice last month. Apologize plainly, confirm the
       refund is processed, and explain the one specific change we made to
       prevent it next time. Do not over-explain.
+
+  # ----- Marketing copy (3) ---------------------------------------------
+
+  - id: marketing.b2b_landing_hero
+    domain: marketing
+    difficulty: medium
+    key_challenge: landing page format, B2B audience, concrete claims over adjectives
+    prompt: >
+      Write landing page hero copy for "Pulse," a B2B observability tool
+      aimed at engineering managers at fast-growing startups. The hero
+      should be a bold one-line claim, three supporting bullets each
+      citing a specific benefit (not generic adjectives), and a primary
+      CTA. Avoid words like "revolutionary," "cutting-edge," or
+      "next-generation."
+
+  - id: marketing.fomo_meal_prep
+    domain: marketing
+    difficulty: medium
+    key_challenge: explicit angle (FOMO), three distinct ad variants, specific
+    prompt: >
+      Write three Google Ads variants (under 30 words each) for "Hearth,"
+      a chef-prepared meal-delivery service targeting busy parents in
+      dual-income households. Use the FOMO angle — what they're missing
+      out on. Each variant must use a distinct hook.
+
+  - id: marketing.value_prop_therapy_app
+    domain: marketing
+    difficulty: medium
+    key_challenge: value prop format, narrow audience, single sentence
+    prompt: >
+      Write a one-sentence value proposition for "Cadence," a HIPAA-compliant
+      AI note-taking app for licensed therapists in private practice.
+      Single sentence, follow the "[product] helps [audience] [outcome]
+      without [pain]" shape. No fluff.
