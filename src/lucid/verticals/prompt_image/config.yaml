@@ -1,0 +1,244 @@
+# Lucid vertical: image prompt engineering.
+# Selected by triage when the user asks for an image-generation prompt
+# targeting Midjourney, Flux, DALL·E, SDXL/Stable Diffusion, Ideogram,
+# Imagen, or model-agnostic. Specialized so the output respects the
+# target model's expected format (Midjourney parameters, SDXL weighted
+# tags, natural-language for Flux/DALL·E/Imagen) and includes the craft
+# elements raw models routinely skip (lighting, composition, camera
+# specifics, mood, negative prompts where applicable).
+
+id: prompt.image
+name: Image Prompt Engineering
+description: >
+  Write expert image-generation prompts for Midjourney, Flux, DALL·E,
+  SDXL/Stable Diffusion, Ideogram, Imagen, or model-agnostic. Output is
+  format-correct for the target model (Midjourney parameters, SDXL
+  weighted tags, natural-language paragraphs for the rest), specifies
+  lighting and composition explicitly, and avoids generic adjectives
+  ("beautiful," "stunning," "high quality") that image models effectively
+  ignore.
+version: 0.1.0
+
+is_fallback: false
+
+questions:
+  - id: image_model
+    prompt: Which image model is the prompt for?
+    type: choice
+    options: [midjourney, flux, dalle, sdxl, ideogram, imagen, model_agnostic]
+    required: true
+    why_it_matters: >
+      Each model has a different prompt format. Midjourney parses
+      parameters like --ar 16:9 --stylize 250 --v 6. SDXL prefers
+      comma-separated weighted tags with negative prompts. Flux, DALL·E,
+      Imagen want natural-language paragraphs. Ideogram excels at
+      in-image text. The same description renders very differently per
+      model, and using the wrong format wastes the model's strengths.
+      model_agnostic produces a description with all the craft elements
+      that the user can adapt to any tool.
+
+  - id: subject
+    prompt: What is the subject — what should the image depict?
+    type: text
+    required: true
+    why_it_matters: >
+      The literal subject is the anchor. Without a specific subject the
+      prompt becomes ambient mood with no focal point.
+
+  - id: style
+    prompt: What style or aesthetic? (Optional — default is photorealistic, cinematic.)
+    type: text
+    required: false
+    default: "photorealistic, cinematic"
+    why_it_matters: >
+      Style is one of the biggest visual drivers — photoreal vs.
+      illustration vs. 3D render vs. oil painting vs. sketch. Most users
+      implicitly want photoreal-cinematic, so the default covers the
+      common case. Override for specific aesthetics (cyberpunk, oil
+      painting, anime, brutalist 3D, watercolor, etc.).
+
+  - id: constraints
+    prompt: Any specific aspect ratio, mood, lighting, must-include, or must-avoid requirements?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Aspect ratio (16:9 / 9:16 / 1:1), mood (tense / serene / nostalgic),
+      lighting overrides (golden hour, harsh studio, volumetric), and
+      negative prompts (no extra fingers, no watermarks, no text in
+      image) all live here. Folded into one optional field rather than
+      split, since most users specify them inline.
+
+prompt_template: |
+  Write an image-generation prompt.
+
+  Target model: {image_model}
+  Subject: {subject}
+  Style: {style}
+  Additional constraints (aspect ratio, mood, lighting, must-include, must-avoid): {constraints}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Match the target model's expected format precisely:
+      midjourney → Natural-language description, comma-separated phrases
+                   for stacking modifiers ("portrait, golden hour, 85mm
+                   lens, shallow depth of field"). End with Midjourney
+                   parameters: --ar [aspect] --stylize [50-1000]
+                   --v 6 (or --v 6.1). Use --ar 16:9 by default for
+                   landscape, 9:16 for portrait, 1:1 for square unless
+                   the constraints say otherwise.
+      flux → Natural-language paragraph, descriptive and flowing.
+             Flux responds well to longer, more vivid prose. No
+             Midjourney-style parameters. Aspect ratio stated in
+             words ("vertical 9:16 framing").
+      dalle → Natural-language paragraph, conversational. Specific
+              and concrete. No model parameters. Aspect ratio in words.
+      sdxl → Two sections explicitly labeled "Prompt:" and "Negative
+             prompt:". The Prompt is comma-separated weighted tags,
+             with weights where appropriate ("(cinematic lighting:1.2),
+             (volumetric:1.1)"). Negative prompt always populated for
+             SDXL — at minimum: "blurry, lowres, bad anatomy,
+             watermark, text artifacts, extra fingers."
+      ideogram → Natural language. If the image includes text in the
+                 image (Ideogram's strength), specify the exact text
+                 in quotes and describe its placement and styling.
+      imagen → Natural-language paragraph similar to Flux/DALL·E.
+               Imagen handles complex compositions well — be concrete
+               about spatial relationships.
+      model_agnostic → Natural-language description capturing subject,
+                       style, lighting, composition, mood, and any
+                       camera specifics. No model-specific syntax.
+
+  - Specify the craft elements explicitly:
+      lighting → name it ("golden hour side-lit," "soft north-window,"
+                 "harsh single overhead studio strobe," "volumetric god
+                 rays through fog," "chiaroscuro"). Default lighting is
+                 the #1 reason an image looks amateur.
+      composition / framing → name it ("close-up portrait," "wide
+                              cinematic establishing shot," "Dutch
+                              angle low to the ground," "over-shoulder,"
+                              "centered symmetrical," "rule of thirds
+                              with subject left").
+      mood → one or two emotional-register words ("tense," "serene,"
+             "melancholic," "triumphant," "intimate").
+      camera + lens (for photographic styles only) → "85mm portrait
+                              lens, shallow depth of field," "24mm wide,
+                              everything in focus," "macro 100mm, razor-
+                              thin focal plane." Skip for non-
+                              photographic styles.
+
+  - Cut generic adjectives. Image models effectively ignore "beautiful,"
+    "stunning," "high quality," "amazing," "best," "masterpiece"
+    (except SDXL where "masterpiece" is a tag convention — use sparingly
+    and only there). Replace with concrete craft elements above.
+
+  - Maintain a single coherent visual register. Do not stack
+    incompatible style names ("Van Gogh meets cyberpunk meets art deco"
+    pulls in opposite directions and blurs the output). If the user
+    asks for a fusion, name the dominant register and the secondary as
+    accent ("art deco architecture with subtle cyberpunk neon
+    accents") — not equal-weight collision.
+
+  - Respect explicit constraints precisely (aspect ratio, must-include
+    elements, must-avoid elements).
+
+  - If "Additional constraints" is empty, ignore that line.
+
+  - Output the prompt directly. Do not preface with "Here's your
+    prompt:" or summarize what the image will look like after delivering
+    it. The prompt is the deliverable.
+
+system_prompt: |
+  You write image-generation prompts that respect the target model's
+  format and include the craft elements (lighting, composition,
+  camera/lens for photo styles, mood) that raw prompts routinely skip.
+  Cut generic adjectives ("beautiful," "stunning," "high quality") —
+  image models ignore them. Keep one coherent visual register; never
+  stack incompatible styles. For SDXL, always include a negative
+  prompt. For Midjourney, always include parameters. Output the prompt
+  and stop.
+
+output_format: text
+
+rubric:
+  - id: format_match
+    name: Format match for target model
+    description: >
+      Output respects the target model's expected format. Midjourney
+      includes parameters. SDXL has Prompt + Negative prompt sections
+      with comma-separated tags. Flux/DALL·E/Imagen are natural-language
+      paragraphs. Ideogram specifies in-image text in quotes when
+      applicable. model_agnostic uses no model-specific syntax.
+    weight: 1.5
+
+  - id: craft_specificity
+    name: Concrete craft elements
+    description: >
+      Lighting, composition, mood, and camera/lens (for photo styles)
+      are all specified concretely. No generic adjectives like
+      "beautiful" or "stunning."
+    weight: 1.5
+
+  - id: visual_coherence
+    name: Single coherent visual register
+    description: >
+      Style commits to one dominant register. Does not stack
+      incompatible style names that pull in opposite directions.
+    weight: 1.0
+
+  - id: subject_clarity
+    name: Subject specificity
+    description: >
+      The subject is concrete and specific, with enough detail to
+      anchor the image. Not vague ("a cool scene").
+    weight: 1.0
+
+  - id: constraint_compliance
+    name: Constraint compliance
+    description: >
+      Aspect ratio, mood, lighting overrides, must-include, and
+      must-avoid requirements are reflected in the output.
+    weight: 1.0
+
+pass_threshold: 0.7
+
+priority: 0
+
+keywords:
+  - midjourney prompt
+  - midjourney prompts
+  - write a midjourney
+  - flux prompt
+  - flux prompts
+  - dalle prompt
+  - dall-e prompt
+  - dall·e prompt
+  - sdxl prompt
+  - stable diffusion prompt
+  - stable-diffusion prompt
+  - ideogram prompt
+  - imagen prompt
+  - image prompt
+  - image prompts
+  - ai image prompt
+  - ai art prompt
+  - image generation prompt
+  - prompt for an image
+  - prompt for the image
+  - prompt for midjourney
+  - prompt for flux
+  - prompt for dalle
+  - prompt for sdxl
+  - prompt for stable diffusion
+  - prompt for ideogram
+  - prompt for imagen
+  - image gen prompt
+
+examples:
+  - "Write a Midjourney prompt for a moody portrait of a violinist mid-performance, dramatic stage lighting"
+  - "SDXL prompt for a cyberpunk Tokyo street market at night, 9:16 vertical"
+  - "Ideogram prompt for a minimalist logo with the text 'NORTHWIND' in art deco style"
+  - "Flux prompt for a photorealistic golden retriever puppy chasing autumn leaves"
+  - "Model-agnostic prompt for a 1970s sci-fi book cover illustration"

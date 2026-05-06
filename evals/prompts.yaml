@@ -511,3 +511,33 @@ prompts:
       round vs. cutting 25% of headcount? We have 9 months of runway,
       flat ARR for two quarters, and a Series A target 12 months out.
       Audience is the board. Lead with the call.
+
+  # ----- Image prompts (3) ----------------------------------------------
+
+  - id: prompt.image_midjourney_portrait
+    domain: image
+    difficulty: medium
+    key_challenge: midjourney format with parameters, lighting + lens specifics
+    prompt: >
+      Write a Midjourney prompt for a moody portrait of a violinist
+      mid-performance, dramatic stage lighting, 4:5 portrait framing.
+      Include camera lens specifics and end with proper Midjourney
+      parameters.
+
+  - id: prompt.image_sdxl_cyberpunk
+    domain: image
+    difficulty: hard
+    key_challenge: SDXL weighted-tag format with mandatory negative prompt section
+    prompt: >
+      SDXL prompt for a cyberpunk Tokyo street market at night, 9:16
+      vertical. Use comma-separated weighted tags. Always include a
+      negative prompt section.
+
+  - id: prompt.image_ideogram_logo
+    domain: image
+    difficulty: medium
+    key_challenge: in-image text rendering, exact text in quotes, art deco style
+    prompt: >
+      Ideogram prompt for a minimalist logo with the exact text
+      "NORTHWIND" in art deco style — strong vertical lines, gold and
+      navy palette, centered composition.

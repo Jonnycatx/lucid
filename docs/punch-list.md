@@ -218,7 +218,9 @@ The Validator (Phase 4) is built but only smoke-tested. Run it on real eval prom
 
 **Effort when triggered.** ~2 hr · no API cost.
 
-### 27. Vertical expansion: 7-vertical seed batch · **IN PROGRESS**
+### 27. Vertical expansion: 7-vertical seed batch · **DONE**
+
+*Completed 2026-05-05 over 7 commits. Doubled specialized vertical count from 3 to 10. Each vertical was designed-discussion-first, then YAML-implemented, then triage-smoke-tested before commit. Eval prompts added for each (3 per vertical, 21 total) so the next n=30 batched API run will exercise specialized verticals rather than routing most prompts to the fallback.*
 
 **What.** Ship 7 high-leverage specialized verticals to bring the total from 4 → 10. Each shipped one at a time with a design-discussion-first flow: agree on dimensions and structure, draft YAML, render sample prompt for sanity, add 2-3 representative eval prompts, commit, move on.
 
@@ -230,8 +232,8 @@ The Validator (Phase 4) is built but only smoke-tested. Run it on real eval prom
 3. ✅ `social.thread` — completed 2026-05-05 · commit `61c044c`
 4. ✅ `explain.feynman` — completed 2026-05-05 · commit `c86bad0`
 5. ✅ `explain.socratic` — completed 2026-05-05 · commit `bb6393e`
-6. ✅ `analysis.recommendation` — completed 2026-05-05 · this commit
-7. ⏳ `prompt.image` ← next
+6. ✅ `analysis.recommendation` — completed 2026-05-05 · commit `a5077c8`
+7. ✅ `prompt.image` — completed 2026-05-05 · this commit
 5. ⏳ `explain.socratic`
 6. ⏳ `analysis.recommendation`
 7. ⏳ `prompt.image`
