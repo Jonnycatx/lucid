@@ -42,29 +42,34 @@ Custom Python orchestration server. Exposes itself externally via MCP. Consumes 
 |---|---|---|---|
 | 0 | Decisions locked | This document complete | DONE |
 | 1 | Foundation | Repo skeleton; schema defined; loader + triage; MCP server skeleton; CI wired | DONE |
-| 2 | First vertical end-to-end | Listener + Translator on document vertical; eval bar hit | IN PROGRESS — pipeline done; eval set + measurement remaining |
-| 3 | Generality | Two more verticals added; architecture transfers without core rewrite | pending |
-| 4 | Validator | Output graded against rubric; re-run on miss; loop closes | pending |
+| 2 | First vertical end-to-end | Listener + Translator on document vertical; eval bar hit | DONE — published 79.4% decisive win rate on n=51, position-debiased Opus 4.6 judge ([`evals/results/skill-full.json`](../evals/results/skill-full.json)) |
+| 3 | Generality | Two more verticals added; architecture transfers without core rewrite | DONE — 10 specialized verticals shipped (document, email, marketing, social, creative, code, explain.feynman, explain.socratic, analysis, prompt.image) plus universal fallback |
+| 4 | Validator | Output graded against rubric; re-run on miss; loop closes | DONE — opt-in via `validate=True` on `run_lucid` |
 | 5 | Memory | Per-user, per-vertical persistence; encrypted, exportable, auditable | pending |
-| 6 | Public release | README polish, branding, contributor guide, GitHub launch | partial — repo public, polish ongoing |
+| 6 | Public release | README polish, branding, contributor guide, GitHub launch | DONE — demo at [jonnycatx.github.io/lucid](https://jonnycatx.github.io/lucid/), `CONTRIBUTING.md` and `docs/authoring-a-vertical.md` shipped, principles canonized in `docs/principles.md`, three GitHub releases tagged. Org rename to `lucid-fluency` deferred to launch moment. |
 
-## What's shipping today (v0.1.0)
+## What's shipping today (v0.2.0)
 
 - Pydantic vertical schema with cross-field placeholder validation
-- One vertical: `document.one_pager` (structured document creation)
-- Vertical loader with keyword + priority triage
-- Listener (intent extraction via Haiku tool-use)
-- Translator (renders template, calls Sonnet 4.6 by default)
-- FastMCP server exposing `lucid_run` with multi-turn clarification flow
-- 47 tests passing across schema, loader, listener, translator, and pipeline
+- 11 verticals: 10 specialized (document, email, marketing, social, creative, code, explain.feynman, explain.socratic, analysis, prompt.image) plus `general.fluency` universal fallback
+- Vertical loader with keyword + priority triage and underscore-prefix exclusion (for the `_template/` scaffold)
+- Listener (intent extraction via Haiku 4.5 tool-use, with prompt caching and graceful API-error handling)
+- Translator (renders template, calls Sonnet 4.6 by default, system prompt sent as cacheable content block)
+- Validator — Phase 4 (rubric grading via Sonnet 4.6, opt-in via `validate=True`, one-rerun budget on miss)
+- FastMCP server exposing `lucid_run` with multi-turn clarification flow + the new `validate` parameter
+- `lucid-check` health command with optional `--live` API smoke test
+- 102 tests passing
 - CI green on Python 3.10, 3.11, 3.12
 
-## What's next for Phase 2 closure
+## What's next (v0.3 candidates)
 
-- Eval set: 10–20 real document-creation prompts with structured rubric
-- DeepEval-based grader using each vertical's rubric
-- Baseline runner: raw prompt to same model, for comparison
-- Acceptance bar: measurable lift over baseline before Phase 2 closes
+- 2-turn eval mode in the harness (so multi-turn verticals like `explain.socratic` are judged on the realistic flow rather than one-shot)
+- `--runner lucid` n=51 eval to measure the MCP-pipeline path against the skill (validates the "advanced install" claim)
+- Iterate on the three eval-weak verticals: `code.review`, `prompt.image`, and the marketing value-prop specificity miss
+- LLM-based triage (Haiku classifier) to catch phrasings keyword-substring matching misses
+- PyPI publication so `pip install lucid` works without `git clone`
+- CI eval gate (n=3 per PR) to prevent quality regressions
+- Phase 5 — Memory layer (significant build, deferred until eval discipline is consistently green)
 
 ---
 
@@ -74,25 +79,51 @@ Custom Python orchestration server. Exposes itself externally via MCP. Consumes 
 lucid/
 ├── pyproject.toml
 ├── README.md
-├── LICENSE                 # MIT
+├── LICENSE                          # MIT
+├── CONTRIBUTING.md
 ├── docs/
-│   ├── thesis.md           # operator version (canonical)
-│   ├── why-lucid.md        # narrative version
-│   └── plan.md             # this file
+│   ├── thesis.md                    # operator version (canonical)
+│   ├── why-lucid.md                 # narrative version
+│   ├── plan.md                      # this file
+│   ├── principles.md                # universal craft principles
+│   ├── authoring-a-vertical.md      # contributor onramp
+│   ├── punch-list.md                # tactical roadmap (living)
+│   ├── audit-2026-05-05.md          # full project audit
+│   └── index.html                   # demo site (served via GH Pages)
+├── skill/lucid-fluency/SKILL.md     # standalone fluency skill
+├── plugin/                          # Cowork plugin bundle
+│   ├── .claude-plugin/plugin.json
+│   ├── .mcp.json
+│   ├── README.md
+│   ├── commands/lucid.md            # /lucid slash command
+│   └── skills/lucid-fluency/SKILL.md
 ├── src/lucid/
 │   ├── __init__.py
-│   ├── server.py           # FastMCP entry, lucid_run tool
-│   ├── listener.py         # Layer 1
-│   ├── translator.py       # Layer 2
-│   ├── memory.py           # Layer 3 — Phase 5
-│   ├── validator.py        # Layer 4 — Phase 4
+│   ├── server.py                    # FastMCP entry, lucid_run tool
+│   ├── check.py                     # lucid-check health command
+│   ├── listener.py                  # Layer 1 — intent extraction
+│   ├── translator.py                # Layer 2 — prompt rendering + execution
+│   ├── validator.py                 # Layer 4 — rubric grading, re-run on miss
 │   └── verticals/
-│       ├── _schema.py
-│       ├── _loader.py
-│       └── document/
-│           └── config.yaml # First vertical
-├── evals/                  # Per-vertical eval sets — Phase 2
-├── tests/
+│       ├── _schema.py               # Pydantic schema, cross-field validators
+│       ├── _loader.py               # discovery + keyword triage + fallback
+│       ├── _template/               # scaffold for new verticals (skipped at load)
+│       ├── general/                 # universal fallback (is_fallback: true)
+│       ├── document/                # document.one_pager
+│       ├── email/                   # email.professional
+│       ├── marketing/               # marketing.copy
+│       ├── social/                  # social.thread
+│       ├── creative/                # creative.story
+│       ├── code/                    # code.review
+│       ├── explain_feynman/         # explain.feynman
+│       ├── explain_socratic/        # explain.socratic
+│       ├── analysis_recommendation/ # analysis.recommendation
+│       └── prompt_image/            # prompt.image
+├── evals/
+│   ├── prompts.yaml                 # 51-prompt eval set
+│   ├── harness.py                   # baseline + treatment + debiased judge
+│   └── results/                     # saved JSON evidence trail
+├── tests/                           # 102 tests
 └── .github/workflows/ci.yml
 ```
 

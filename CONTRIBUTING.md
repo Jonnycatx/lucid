@@ -1,12 +1,14 @@
 # Contributing to Lucid
 
-Thanks for considering a contribution. Lucid is alpha — the architecture is still settling and the eval discipline that gates changes is being built in Phase 2. Read this before opening a PR.
+Thanks for considering a contribution. Lucid is at v0.2.0 — Phases 1 through 4 of the build plan are shipped, Phase 5 (Memory) is the only major roadmap item remaining. The eval discipline is real and the published headline win rate (79.4% decisive on n=51, position-debiased Opus 4.6 judge) is the bar new contributions are measured against.
+
+Read this before opening a PR.
 
 ## Project philosophy
 
 - **Fluency, not capability.** Lucid does not ship features that compete with the underlying model. It ships features that improve the channel between the user and the model.
 - **Verticals as data, not code.** Adding a new domain should be a YAML file, not a code change. If your contribution requires hardcoded logic for a specific domain, the architecture is wrong — open an issue first.
-- **Tests gate everything.** Every change must pass `pytest`. Eval-affecting changes will be gated by the eval suite once Phase 2 ships it.
+- **Tests gate everything.** Every change must pass `pytest` (currently 102 tests). Eval-affecting changes — skill body, vertical templates, rubrics — should ideally be re-measured against the eval set before merge. CI eval gating is on the v0.3 roadmap.
 
 ## Easy first contributions
 
@@ -17,7 +19,7 @@ Thanks for considering a contribution. Lucid is alpha — the architecture is st
 
 ## Larger contributions
 
-For new layers (Validator, Memory) or architectural changes, open an issue first to discuss. The build plan in [`docs/plan.md`](docs/plan.md) lays out the intended sequence; deviations are welcome but should be discussed before code.
+For new layers (Memory is the only major one remaining — Validator shipped in v0.2.0) or architectural changes, open an issue first to discuss. The build plan in [`docs/plan.md`](docs/plan.md) and the tactical roadmap in [`docs/punch-list.md`](docs/punch-list.md) lay out the intended sequence; deviations are welcome but should be discussed before code.
 
 ## Setup
 
