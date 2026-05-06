@@ -8,7 +8,7 @@
 
 **One click. Zero setup.** [Download `lucid.skill`](https://github.com/Jonnycatx/lucid/releases/latest/download/lucid.skill), open it with Claude Desktop or Cowork, click *Save skill*. Lucid is on. No Python, no API key, no command line. Lucid uses your existing Claude session — nothing extra to configure.
 
-The skill auto-fires on requests where prompt quality matters — documents, code, creative work, analysis. It listens for your true intent, asks one or two clarifying questions if anything required is missing, then produces structured output designed to beat a raw prompt to the same model. Win rate against a 30-prompt eval set with a position-debiased LLM judge is being measured for v0.2 closure; see [`evals/`](evals/).
+The skill auto-fires on requests where prompt quality matters — documents, code, creative work, analysis, email, marketing, social, image prompts, and more. It listens for your true intent, asks one or two clarifying questions only when an answer would change the deliverable's shape, then produces structured output that beats a raw prompt to the same model. **Measured: 79.4% decisive win rate (27 W / 7 L / 17 T) on a 51-prompt eval set, position-debiased Opus 4.6 judge.** See [`evals/`](evals/) and the saved JSON in [`evals/results/skill-full.json`](evals/results/skill-full.json).
 
 > **Capability is a race. Fluency is a moat.**
 
@@ -117,8 +117,8 @@ Four layers between your request and the model.
 | MCP server: Listener + Translator + multi-turn clarification | Shipped |
 | Validator layer: rubric grading + one-rerun budget | Shipped — opt-in |
 | Cowork plugin packaging | Shipped |
-| Eval harness (30 prompts, position-debiased LLM judge) | Shipped |
-| Measured win rate vs. baseline | In progress |
+| Eval harness (51 prompts, position-debiased Opus judge) | Shipped |
+| Measured win rate vs. baseline (skill runner, n=51) | **79.4% decisive (27 W / 7 L / 17 T)** — see [`evals/results/skill-full.json`](evals/results/skill-full.json) |
 | Memory layer | Planned (Phase 5) |
 
 **102 tests passing.** CI green on Python 3.10 / 3.11 / 3.12.

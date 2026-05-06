@@ -459,10 +459,19 @@ def _build_client() -> Optional["Anthropic"]:
 def cli_compare(args: argparse.Namespace) -> int:
     prompts_path = Path(args.prompts)
     prompts = load_prompts(prompts_path)
-    if args.domain:
-        prompts = [p for p in prompts if p.domain == args.domain]
-    if args.limit:
-        prompts = prompts[: args.limit]
+    if args.ids:
+        wanted = [s.strip() for s in args.ids.split(",") if s.strip()]
+        by_id = {p.id: p for p in prompts}
+        missing = [i for i in wanted if i not in by_id]
+        if missing:
+            print(f"ERROR: prompt ids not found in {prompts_path}: {missing}")
+            return 2
+        prompts = [by_id[i] for i in wanted]
+    else:
+        if args.domain:
+            prompts = [p for p in prompts if p.domain == args.domain]
+        if args.limit:
+            prompts = prompts[: args.limit]
 
     print(f"Loaded {len(prompts)} prompts from {prompts_path}")
     print(f"Treatment runner: {args.runner}")
@@ -537,6 +546,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Path to prompts.yaml",
     )
     compare_parser.add_argument("--domain", help="Restrict to a single domain (e.g. 'document').")
+    compare_parser.add_argument(
+        "--ids",
+        help="Comma-separated list of prompt ids to run. Overrides --limit and "
+        "--domain. Useful for running a curated cross-vertical sample.",
+    )
     compare_parser.add_argument("--limit", type=int, help="Run at most N prompts.")
     compare_parser.add_argument("--output", help="Write full results JSON to this path.")
     compare_parser.add_argument(

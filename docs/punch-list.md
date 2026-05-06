@@ -79,21 +79,13 @@ The n=3 smoke run on 2026-05-05 produced two findings that shape this tier:
 
 **Effort.** ~5 min · ~$1 API cost.
 
-### 7. n=10 directional run · **PARKED**
+### 7. n=10 directional run · **DONE**
 
-**What.** `--limit 10`, mixed across domains (document, creative, code, lifestyle, education).
+*Completed 2026-05-05 · curated 10-prompt cross-vertical sample (one per specialized vertical) via new `--ids` flag added to harness. Result: 4 W / 0 L / 6 T = 100% decisive on the directional sample. Wins driven by specificity (technical detail in document, audience-fit + emotional resonance in marketing, lens-and-camera completeness in image, length-constraint compliance in email). Ties on creative/code/explain/social where raw Sonnet is already strong. JSON saved to `evals/results/skill-10-cross-vertical.json`.*
 
-**Efficiency case.** Real signal at n=10 — variance becomes interpretable. Reveals whether the skill wins broadly or only on documents. **Decides whether to invest in n=30 or back up and improve further.**
+### 8. n=51 full eval · **DONE**
 
-**Effort.** ~10 min · ~$5 API cost.
-
-### 8. n=30 full eval · **PARKED**
-
-**What.** Full 30-prompt eval with `--runner skill`. Saved JSON committed to `evals/results/`.
-
-**Efficiency case.** This is the artifact that converts "Lucid is theoretically better" → "Lucid is X% better, position-debiased Opus judge, here's the JSON." **Unlocks: demo site headline number, README win-rate claim, the credibility signal needed for adoption.**
-
-**Effort.** ~20 min · ~$10–15 API cost.
+*Completed 2026-05-05 · full eval set (30 original + 21 vertical-batch additions = 51 prompts) with `--runner skill`. **Result: 79.4% decisive win rate (27 W / 7 L / 17 T), position-debiased Opus 4.6 judge.** Strongest domain: document (87% decisive — 13 W / 0 L / 2 T). Domains where Lucid lost or struggled: code (0/2), image (1/3 W with 2 L), education (0/2). Ties dominate social (3/3). Loss-pattern analysis revealed two clusters — (a) judge preferring baseline's "kitchen sink" scaffolding (extra tables, settings, alternative variants) over Lucid's tightness in 5/7 losses, which is a stylistic difference more than a quality regression; (b) two genuine misses (`marketing.value_prop_therapy_app` was too generic on pain points; `explain.socratic_hire_decision` chose a supporting question instead of the most strategic one) that are real iteration opportunities for v0.4. Full JSON committed to `evals/results/skill-full.json`. README and demo site updated with the measured number.*
 
 ### 9. n=30 MCP-pipeline eval (`--runner lucid`) · **PARKED**
 
