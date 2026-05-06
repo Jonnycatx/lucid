@@ -1,0 +1,182 @@
+# Lucid vertical: Socratic / question-led teaching.
+# Selected by triage when the user asks to be guided to understanding
+# through questions rather than told. The vertical is fundamentally
+# multi-turn — each call produces ONE question, then stops, and the
+# learner's reply drives the next call. Specialized so the prompt enforces
+# the single most failure mode here: models love to pretend they're being
+# Socratic while actually lecturing.
+
+id: explain.socratic
+name: Socratic / Guided Teaching
+description: >
+  Teach a topic through questions, not explanation. Each turn produces a
+  single question (rarely two) that opens the next door for the learner,
+  then stops and waits. Specialized so the output respects the multi-turn
+  nature of Socratic dialogue and refuses to lecture, answer its own
+  questions, or pre-load leading questions.
+version: 0.1.0
+
+is_fallback: false
+
+questions:
+  - id: target_understanding
+    prompt: What should the learner understand by the end of the dialogue?
+    type: text
+    required: true
+    why_it_matters: >
+      Without a clear target, the question chain wanders. The teacher
+      needs to know where the learner should arrive in order to choose
+      the right opening door. If the user gave a topic ("teach me about
+      X") rather than a goal, infer the most useful learning goal from
+      the topic.
+
+  - id: learner_background
+    prompt: What does the learner already know? What's their background?
+    type: text
+    required: false
+    default: "no prior expertise — general adult learner"
+    why_it_matters: >
+      Background determines vocabulary, abstraction level, and what
+      experiences the first question can anchor in. A non-expert opens
+      with concrete experience. A practitioner opens with edge cases or
+      intuitions about formal structure.
+
+prompt_template: |
+  Open a Socratic dialogue with a learner.
+
+  Target understanding (where the chain should eventually lead): {target_understanding}
+  Learner background: {learner_background}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Produce ONLY the first question (or a tightly-grouped pair, if a
+    single question would be too narrow). Do not write a multi-turn
+    dialogue. Do not preview where the chain is going. After your
+    question, STOP. The learner's reply will drive the next call.
+
+  - The first question opens an obvious door — something the learner
+    can answer from common knowledge, observation, or their own
+    experience. Do not open with the destination; open with where they
+    already stand.
+
+  - You may include up to two short sentences of context to give the
+    question a footing — but only if necessary. Most first questions
+    need no context at all. The context never substitutes for the
+    question.
+
+  - Do not ask leading questions that pre-load the desired answer
+    ("Wouldn't you agree that...?", "Don't you think...?"). A real
+    Socratic question genuinely invites the learner to think, even to
+    answers you don't expect. If your question only has one acceptable
+    answer, it's a leading question and you should rewrite it.
+
+  - Do not answer your own question. Do not provide hints, paths, or
+    "you might consider..." asides. Trust the dialogue.
+
+  - Do not lecture. No explanatory paragraphs, no "this question
+    matters because..." asides, no "what we're going to explore..."
+    framing. The question stands alone.
+
+  - If the user gave a topic ("teach me about X") instead of a clear
+    target understanding, infer the most useful learning goal and open
+    on it directly. Do not ask the user to clarify their goal.
+
+  - Calibrate vocabulary and abstraction level to the learner's
+    background. A non-expert gets a question grounded in everyday
+    experience. A practitioner gets a question that probes formal
+    structure or edge cases.
+
+  - End immediately after the question(s). Do not say "I'm waiting for
+    your answer" or "let me know what you think" — the question itself
+    is the wait.
+
+system_prompt: |
+  You guide a learner to understanding through questions, not through
+  explanation. Each turn produces one question (rarely two), then
+  stops. The first question opens a door the learner can walk through
+  from their current position. Questions are real — they invite real
+  thought, not just the answer you expect. Never lecture. Never answer
+  your own questions. Trust the dialogue.
+
+output_format: text
+
+rubric:
+  - id: question_quality
+    name: Opening question quality
+    description: >
+      First question opens an obvious door — answerable from common
+      knowledge, observation, or experience. Not too narrow (single
+      acceptable answer) and not too broad (vague invitation to think).
+    weight: 1.5
+
+  - id: non_leading
+    name: Genuinely non-leading
+    description: >
+      Question invites real thought, not the expected answer. Has more
+      than one defensible response. No "Wouldn't you agree..." framing.
+    weight: 1.5
+
+  - id: single_turn_discipline
+    name: Single-turn discipline
+    description: >
+      Output is the first question (or a tight pair) and stops. No
+      multi-turn dialogue, no answering own questions, no "next we'll
+      explore..." preview, no lecture or explanation paragraphs.
+    weight: 1.5
+
+  - id: audience_calibration
+    name: Audience calibration
+    description: >
+      Vocabulary and abstraction level fit the stated learner
+      background. Non-experts get experience-anchored questions;
+      practitioners get formal-structure or edge-case questions.
+    weight: 1.0
+
+  - id: target_alignment
+    name: On the path to the target
+    description: >
+      First question is genuinely on the chain that leads to the
+      target understanding, not a tangent or a teacher's-favorite-
+      question that doesn't connect.
+    weight: 1.0
+
+pass_threshold: 0.7
+
+priority: 0
+
+keywords:
+  # Socratic explicit
+  - socratic
+  - socratic method
+  - socratic dialogue
+  - socratically
+  # "Ask me questions" patterns
+  - ask me a series of questions
+  - series of questions
+  - ask me leading questions
+  - ask me questions
+  - guide me through questions
+  - guide me with questions
+  - teach me through questions
+  # Deduction / discovery framing
+  - help me deduce
+  - help me discover
+  - help me figure out
+  - lead me to the answer
+  - lead me to the conclusion
+  - so i can deduce
+  # Multi-turn signals
+  - wait for my answer
+  - one question at a time
+  - one at a time, then wait
+  # Anti-summary framing
+  - instead of giving me a summary
+  - instead of explaining
+
+examples:
+  - "I want to learn about the French Revolution. Ask me a series of questions to help me deduce the causes myself, instead of summarizing."
+  - "Use the Socratic method to help me decide whether to take the new job offer."
+  - "Teach me about Bayesian reasoning by asking me one question at a time."
+  - "Help me figure out why my code is slow — guide me with questions, don't tell me the answer."

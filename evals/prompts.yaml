@@ -446,3 +446,34 @@ prompts:
       not use analogies that require already understanding hashing,
       cryptography, or distributed systems. In the third section,
       name two specific things the kid version glosses over.
+
+  # ----- Socratic dialogue (3) ------------------------------------------
+
+  - id: explain.socratic_market_efficiency
+    domain: explain
+    difficulty: medium
+    key_challenge: first-question-only discipline, opens obvious door, non-leading
+    prompt: >
+      I want to understand whether financial markets are efficient.
+      Lead me there with questions instead of summarizing. One question
+      at a time — wait for my reply before continuing. Don't answer
+      your own questions.
+
+  - id: explain.socratic_evolution_topic
+    domain: explain
+    difficulty: hard
+    key_challenge: topic input (not target), audience calibration to non-scientist
+    prompt: >
+      Teach me about evolution by natural selection. I'm not a
+      biologist — anchor questions in things I'd recognize from
+      everyday life. One question at a time, then wait.
+
+  - id: explain.socratic_hire_decision
+    domain: explain
+    difficulty: medium
+    key_challenge: applied to personal decision, non-leading questions
+    prompt: >
+      Help me think through whether I should hire a salesperson or
+      do sales myself for the next 6 months. Ask me a series of
+      questions rather than giving advice. Start with the single
+      most important question.
