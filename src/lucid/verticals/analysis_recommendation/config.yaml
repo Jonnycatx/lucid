@@ -1,0 +1,257 @@
+# Lucid vertical: strategic recommendations from analysis.
+# Selected by triage when the user is asking the model to FORM a
+# recommendation from inputs (research, data, intuition, or first
+# principles), as distinct from document.one_pager which FORMATS an
+# already-decided recommendation as a document. Specialized so the prompt
+# template attacks the failure modes raw models are notoriously bad at:
+# hedging into uselessness, listing options instead of recommending,
+# ignoring stakes, and skipping the reasoning chain.
+
+id: analysis.recommendation
+name: Strategic Recommendations
+description: >
+  Form a recommendation on a decision from available inputs. Output
+  leads with one explicit recommendation, names 3-5 supporting reasons
+  with concrete grounding, addresses the strongest counter directly,
+  calibrates confidence to stakes, and ends with a specific next
+  action. Refuses to hedge, refuses to substitute "here are three
+  options" for an actual recommendation.
+version: 0.1.0
+
+is_fallback: false
+
+questions:
+  - id: decision_question
+    prompt: What is the specific decision being made?
+    type: text
+    required: true
+    why_it_matters: >
+      Without knowing the exact question, the recommendation drifts.
+      "Should we acquire X?" / "Which of these 3 vendors?" / "Pause or
+      push forward?" are different shapes. The decision question is
+      what the recommendation must answer — not adjacent advice the
+      model thinks the user should also hear.
+
+  - id: inputs
+    prompt: What inputs are available — research summary, data points, prior analysis, the user's gut take?
+    type: text
+    required: false
+    default: "first principles — no specific data, research, or prior analysis provided"
+    why_it_matters: >
+      Inputs are what the recommendation must cite. With concrete data
+      ("4.2% monthly churn"), the reasoning gets to be specific. Without
+      data, reasoning has to be principled and the recommendation has
+      to acknowledge it's first-principles. Default lets users ask the
+      model to weigh in cold; power users provide research.
+
+  - id: stakes
+    prompt: How high are the stakes?
+    type: choice
+    options: [low, medium, high, one-way-door]
+    required: false
+    default: medium
+    why_it_matters: >
+      Stakes drive how much hedging is appropriate, how many caveats
+      to surface, and whether to name the conditions under which you'd
+      revise the call. A reversible Tuesday-morning decision needs less
+      caveat density than a one-way-door bet-the-company decision.
+      One-way-door is reserved for decisions that genuinely cannot be
+      reversed (acquisitions, key executive hires, foundational
+      architecture commitments).
+
+  - id: audience
+    prompt: Who is the recommendation for?
+    type: text
+    required: false
+    default: "the team making the decision"
+    why_it_matters: >
+      Audience drives tone and the appropriate level of formal hedge.
+      Self → direct. Team → confident, briefed. Leadership → confident
+      but with the strongest counter explicitly addressed. Board → most
+      formal, recommendation framed as a decision the board can ratify.
+
+  - id: constraints
+    prompt: Any specific length, format, or content requirements?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Length cap, must-include risks, must-not-recommend options,
+      timeframes — all live here.
+
+prompt_template: |
+  Form a strategic recommendation.
+
+  Decision question: {decision_question}
+  Inputs available: {inputs}
+  Stakes: {stakes}
+  Audience: {audience}
+  Additional constraints: {constraints}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Lead with the recommendation in ONE sentence, stated plainly. Not
+    "It depends...", not "There are several considerations...", not "I
+    recommend exploring..." The reader should know your call before
+    they finish the first line.
+
+  - Never substitute "here are three options for you to consider" for
+    an actual recommendation. The user asked for a recommendation;
+    deliver one. If the inputs genuinely don't permit a confident
+    answer, say "Recommend X, with the strong caveat that..." — pick
+    one and explain the caveat. Listing options without ranking them
+    is a refusal to do the work.
+
+  - Provide 3-5 supporting reasons. Each must cite a specific input
+    when inputs are available, or be derived from explicit
+    first-principles reasoning when they are not. "The market
+    research shows..." or "Given typical SaaS gross margins of
+    70-80%..." beats "industry trends suggest." Generic reasoning
+    fails.
+
+  - Name the strongest counter to your recommendation explicitly. Not
+    "there are some concerns" — the actual best argument against the
+    call. Then address it: either show why it doesn't change the
+    recommendation, or surface the specific evidence that would.
+
+  - Calibrate confidence to stakes:
+      low → confident and brief. Minimal caveats. Move on.
+      medium → confident with one or two material caveats noted.
+      high → confident, but state your assumptions explicitly and the
+             specific evidence that would revise the call.
+      one-way-door → most rigorous. State your assumptions. Name the
+                     specific conditions under which you'd revise.
+                     Acknowledge that the decision cannot be unwound.
+                     If you would revise on N% of plausible outcomes,
+                     say so plainly.
+
+  - End with a specific next action — not "go forward" but what
+    happens this week. "Schedule due diligence kickoff with Legal by
+    Friday." "Hold the decision pending the customer survey results
+    expected next Tuesday." "Run a 2-week pilot with the Tier 2 SKU
+    before committing to the full rollout."
+
+  - Calibrate tone and hedging to the audience. Self → direct. Team →
+    confident, briefed. Leadership → confident with strongest counter
+    addressed. Board → most formal.
+
+  - Respect explicit constraints precisely.
+
+  - If "Additional constraints" is empty, ignore that line.
+
+  - Do not produce a multi-page deliberation. The recommendation, its
+    reasons, the strongest counter, and the next action should fit
+    well under 500 words for medium-stakes decisions, slightly more
+    for one-way-door.
+
+  - Do not preface the recommendation ("Great question! After careful
+    analysis..."). Do not summarize at the end. Output the
+    recommendation and stop.
+
+system_prompt: |
+  You form strategic recommendations from inputs. Lead with the call,
+  in one sentence. 3-5 reasons, each citing a specific input or
+  first-principles derivation. Always name the strongest counter
+  explicitly. Calibrate confidence to stakes. End with a specific
+  next action — what happens this week, not "go forward." Never list
+  options without ranking them. Never hedge into uselessness. Output
+  the recommendation and stop.
+
+output_format: structured
+
+rubric:
+  - id: leads_with_call
+    name: Leads with the recommendation
+    description: >
+      First sentence states the recommendation plainly. Not "it
+      depends" or "there are considerations" or "I recommend
+      exploring." The reader knows the call immediately.
+    weight: 1.5
+
+  - id: refuses_option_listing
+    name: Recommends rather than lists options
+    description: >
+      Output is a recommendation, not "here are three options for you
+      to consider." If multiple options were on the table, one is
+      chosen explicitly.
+    weight: 1.5
+
+  - id: grounded_reasons
+    name: Reasons cite specific inputs or first principles
+    description: >
+      3-5 reasons, each citing a specific input ("the churn data shows
+      4.2%") or stating an explicit first-principles derivation. No
+      generic "industry trends suggest" filler.
+    weight: 1.5
+
+  - id: counter_addressed
+    name: Strongest counter named and addressed
+    description: >
+      The actual best argument against the recommendation is stated
+      explicitly. Then either shown not to change the call, or the
+      specific evidence that would change it is identified.
+    weight: 1.0
+
+  - id: stakes_calibration
+    name: Confidence calibrated to stakes
+    description: >
+      Hedge density matches stakes level. Low → brief and direct.
+      One-way-door → assumptions explicit, revision conditions named,
+      irreversibility acknowledged.
+    weight: 1.0
+
+  - id: action_specificity
+    name: Next action specificity
+    description: >
+      Ends with a concrete next action — what happens this week, who
+      acts, and any deadline. Not "go forward" or "monitor closely."
+    weight: 1.0
+
+pass_threshold: 0.7
+
+priority: 0
+
+keywords:
+  # Direct recommendation phrasings
+  - recommend whether
+  - recommend that we
+  - what's your recommendation
+  - what is your recommendation
+  - your recommendation on
+  - give me a recommendation
+  - make a recommendation
+  - weigh in on
+  - tell me whether we should
+  - tell me whether to
+  # "Should we / I" combined with substantive verbs (less generic)
+  - should we acquire
+  - should we hire
+  - should we launch
+  - should we pause
+  - should we discontinue
+  - should we sunset
+  - should we move forward
+  - should we expand
+  - should we raise prices
+  - should i hire
+  - should i pause
+  - should i launch
+  - should i discontinue
+  - should i raise
+  # Decision framing
+  - help me decide whether
+  - what should we do about
+  - is it worth
+  - is now the right time to
+  - is it the right time to
+  - make the case for
+  - make the case against
+  - case for or against
+
+examples:
+  - "Should we raise prices 15% in Q1? Churn is 4.2% monthly; pricing-sensitivity survey shows 60% would tolerate up to 10%, 35% to 20%."
+  - "Recommend whether to commit to Kubernetes for our new platform. One-way-door decision."
+  - "Make the case for or against hiring an in-house GC vs. continuing with our outside firm."
+  - "What's your recommendation on extending runway with a bridge round vs. cutting headcount?"

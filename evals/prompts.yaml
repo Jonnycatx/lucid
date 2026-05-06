@@ -477,3 +477,37 @@ prompts:
       do sales myself for the next 6 months. Ask me a series of
       questions rather than giving advice. Start with the single
       most important question.
+
+  # ----- Strategic recommendations (3) ----------------------------------
+
+  - id: analysis.pricing_increase
+    domain: analysis
+    difficulty: medium
+    key_challenge: high stakes, real data inputs, must lead with call and address counter
+    prompt: >
+      Should we raise prices 15% in Q1? Inputs: monthly churn is 4.2%;
+      pricing-sensitivity survey shows 60% of customers would tolerate
+      up to a 10% increase, 35% up to 20%, 5% would churn at any
+      increase. Audience is the leadership team. High stakes.
+
+  - id: analysis.kubernetes_oneway
+    domain: analysis
+    difficulty: hard
+    key_challenge: one-way-door stakes, must name revision conditions
+    prompt: >
+      Recommend whether to commit to Kubernetes for our new platform.
+      One-way-door decision — once we build on it, switching off is
+      a year-long project. We have a 6-engineer team, 80% of whom
+      have Kubernetes experience. Predicted load is 5x current. State
+      assumptions explicitly and the specific conditions under which
+      you'd reverse the call.
+
+  - id: analysis.bridge_round_vs_cuts
+    domain: analysis
+    difficulty: hard
+    key_challenge: founder-stakes recommendation, no specific data, must reason from first principles
+    prompt: >
+      What's your recommendation on extending runway with a bridge
+      round vs. cutting 25% of headcount? We have 9 months of runway,
+      flat ARR for two quarters, and a Series A target 12 months out.
+      Audience is the board. Lead with the call.
