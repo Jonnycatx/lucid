@@ -1,0 +1,189 @@
+# Lucid vertical: Feynman-style two-level explanation.
+# Selected by triage when the user asks for an "explain like I'm 5/10",
+# Feynman-style, ELI5, or two-level explanation. Specialized so the output
+# always includes three sections — simple version, expert version, and the
+# explicit cost of the simplification — which is the signature move of the
+# Feynman technique that raw models routinely skip.
+
+id: explain.feynman
+name: Feynman-Style Explanations
+description: >
+  Explain a topic at two clearly-labeled levels — first to a curious
+  10-year-old, then to a first-year PhD student in the field — and then
+  explicitly name what the simple version gets wrong or leaves out.
+  Specialized so the third "cost of simplification" section is always
+  produced; that's the move that distinguishes a Feynman explanation
+  from a generic "explain simply then technically" attempt.
+version: 0.1.0
+
+is_fallback: false
+
+questions:
+  - id: topic_or_concept
+    prompt: What topic or concept should be explained?
+    type: text
+    required: true
+    why_it_matters: >
+      Without a specific topic, the explanation has nothing to anchor.
+      The Feynman move depends on having a real concept to render at two
+      levels and to identify the simplification cost of.
+
+  - id: constraints
+    prompt: Any specific length, format, or content requirements?
+    type: text
+    required: false
+    default: ""
+    why_it_matters: >
+      Length cap, must-include analogies, must-avoid jargon, or domain
+      context (e.g. "this is for physics not finance") all live here.
+      Folded into one optional field rather than split, since the form
+      itself is rigid enough that most users won't need to specify
+      anything.
+
+prompt_template: |
+  Produce a Feynman-style two-level explanation.
+
+  Topic or concept: {topic_or_concept}
+  Additional constraints: {constraints}
+
+  Original user request (verbatim):
+  {original_intent}
+
+  Requirements:
+  - Output must contain exactly three sections, in this order, with
+    these exact headers:
+
+      ### For a curious 10-year-old
+      ### For a first-year PhD student in the field
+      ### What the simple version gets wrong
+
+  - Section 1 (For a curious 10-year-old):
+      Use everyday analogies that work for a child. Concrete objects,
+      familiar experiences, plain words. No field-specific vocabulary.
+      Do not use analogies that require the very knowledge you're
+      trying to explain (e.g. don't explain quantum entanglement using
+      "imagine two electrons" — a 10-year-old doesn't know electrons).
+      The simple version must be self-contained: a reader who only
+      reads this section gets a real, accurate-as-far-as-it-goes
+      understanding.
+
+  - Section 2 (For a first-year PhD student in the field):
+      Use precise terminology. Name the formal concepts. Use the
+      mathematical or technical framing the field actually uses. Go
+      genuinely deeper — this is NOT the simple version with jargon
+      added. Introduce the structure or mechanism the simple version
+      had to gloss over. Self-contained: a reader who only reads this
+      section gets a real expert-level introduction.
+
+  - Section 3 (What the simple version gets wrong):
+      This is the signature Feynman move. Explicitly name what the
+      10-year-old version simplifies, distorts, or omits. Where does
+      the analogy break? What's the actual mechanism the simple
+      version replaces with a heuristic? What edge cases or important
+      counterintuitive features only appear at the expert level? Two
+      to four specific points. Concrete, not vague.
+
+  - Each section stands alone. A reader of one shouldn't need the
+    others.
+  - Do not skip any section. Do not merge sections. Do not add a fourth.
+  - If "Additional constraints" is empty, ignore that line.
+  - Do not preface the explanation with meta-commentary ("Great
+    question! Let me explain..."). Do not summarize at the end. Output
+    the three sections and stop.
+
+system_prompt: |
+  You produce Feynman-style two-level explanations. Three required
+  sections in fixed order: simple (for a curious 10-year-old), expert
+  (for a first-year PhD student in the field), and the explicit cost of
+  the simple version. The simple version uses only everyday analogies a
+  child would recognize, never uses analogies that require what's being
+  explained, and stands alone. The expert version is genuinely deeper —
+  not the simple version with jargon. The third section is the signature
+  move: name what the simple version gets wrong. Output the three
+  sections and stop.
+
+output_format: markdown
+
+rubric:
+  - id: accessibility
+    name: Simple-version accessibility
+    description: >
+      The 10-year-old version uses everyday analogies the audience would
+      recognize, plain language, no field-specific vocabulary. Analogies
+      do not require knowledge of the very thing being explained.
+    weight: 1.5
+
+  - id: depth
+    name: Expert-version depth
+    description: >
+      The PhD-student version uses precise terminology and goes
+      genuinely deeper — not simply the 10-year-old version with jargon
+      added. Introduces formal concepts and mechanism.
+    weight: 1.5
+
+  - id: simplification_cost
+    name: Simplification cost named
+    description: >
+      The third section explicitly names what the simple version
+      simplifies, distorts, or omits. Two to four specific points,
+      concrete (where the analogy breaks, what mechanism is glossed,
+      what edge cases only appear at the expert level).
+    weight: 1.5
+
+  - id: self_containment
+    name: Sections stand alone
+    description: >
+      Each section is self-contained — a reader of one section gets a
+      real, complete understanding at that level without needing the
+      others.
+    weight: 1.0
+
+  - id: structural_compliance
+    name: Three-section structure
+    description: >
+      Output contains exactly three sections, in the specified order,
+      with the specified headers. No merged sections, no skipped
+      sections, no extra fourth section, no meta-preface.
+    weight: 1.0
+
+pass_threshold: 0.7
+
+priority: 0
+
+keywords:
+  # ELI5 / "like I'm N years old" patterns
+  - explain like i'm 5
+  - explain like i'm 10
+  - explain like i am 5
+  - explain like i am 10
+  - eli5
+  # "to a 10-year-old / 10 year old / 10 years old" — all variants
+  - to a 10-year-old
+  - to a 10 year old
+  - to a 10 years old
+  - 10 years old
+  - to a child
+  - as if i am 10
+  - as if i was 10
+  - as if i'm 10
+  # Feynman explicit
+  - feynman
+  # Two-level / dual-level patterns
+  - two-level explanation
+  - two level explanation
+  - at two levels
+  - two levels
+  - then to a phd student
+  - then to a grad student
+  - then to a first-year phd
+  - then explain it again
+  - simple then technical
+  - simple version then expert version
+  - explain simply then in depth
+  - explain simply then technically
+
+examples:
+  - "Explain quantum entanglement to me as if I am 10 years old, then to a first-year PhD student. Highlight what gets lost in translation."
+  - "Feynman-style explanation of how vaccines actually work"
+  - "ELI5 then explain to a grad student: how does Bitcoin's proof-of-work prevent double-spending?"
+  - "Explain compound interest at two levels — for a kid and for a finance grad student"

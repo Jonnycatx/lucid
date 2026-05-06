@@ -413,3 +413,36 @@ prompts:
       mindfulness app for new parents. Use a story hook — open in a
       specific scene. Hook in line 1 only. Single CTA at the end. 3-5
       relevant hashtags maximum.
+
+  # ----- Feynman-style explanations (3) ---------------------------------
+
+  - id: explain.feynman_vaccines
+    domain: explain
+    difficulty: medium
+    key_challenge: three-section structure, accurate analogy at child level, named simplification cost
+    prompt: >
+      Feynman-style explanation of how vaccines actually train the
+      immune system. Two levels (curious 10-year-old, then a first-year
+      PhD student in immunology). Then explicitly name what the simple
+      version leaves out or distorts.
+
+  - id: explain.feynman_compound_interest
+    domain: explain
+    difficulty: medium
+    key_challenge: practical topic, real numbers in expert version, simplification cost
+    prompt: >
+      Explain compound interest in Feynman style — once for a kid, once
+      for a finance grad student. End by naming what the kid version
+      gets wrong about how compounding actually behaves at long horizons
+      and across taxes/inflation.
+
+  - id: explain.feynman_proof_of_work
+    domain: explain
+    difficulty: hard
+    key_challenge: technical topic, child-level must avoid required-knowledge analogies
+    prompt: >
+      ELI5 then explain to a grad student: how does Bitcoin's
+      proof-of-work prevent double-spending? In the kid version, do
+      not use analogies that require already understanding hashing,
+      cryptography, or distributed systems. In the third section,
+      name two specific things the kid version glosses over.

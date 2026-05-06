@@ -227,8 +227,9 @@ The Validator (Phase 4) is built but only smoke-tested. Run it on real eval prom
 **Sequence.**
 1. ✅ `email.professional` — completed 2026-05-05 · commit `802dbfe`
 2. ✅ `marketing.copy` — completed 2026-05-05 · commit `d7d945e`
-3. ✅ `social.thread` — completed 2026-05-05 · this commit
-4. ⏳ `explain.feynman` ← next
+3. ✅ `social.thread` — completed 2026-05-05 · commit `61c044c`
+4. ✅ `explain.feynman` — completed 2026-05-05 · this commit
+5. ⏳ `explain.socratic` ← next
 5. ⏳ `explain.socratic`
 6. ⏳ `analysis.recommendation`
 7. ⏳ `prompt.image`
