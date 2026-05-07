@@ -1,6 +1,6 @@
 {
   "name": "lucid",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "The fluency layer between human intent and AI output. Lucid listens for true intent, translates it into the optimal prompt for the model, and returns dramatically better output without the user having to learn how to prompt.",
   "author": {
     "name": "Jonathan Fiorucci"

@@ -9,7 +9,7 @@ When this skill activates, follow the four-step protocol below before producing 
 
 The skill also internalizes the universal craft principles documented in [`docs/principles.md`](https://github.com/Jonnycatx/lucid/blob/main/docs/principles.md) — lead with what serves the form, produce with placeholders before asking, be specific, match audience, show don't tell, end with what the form earned, respect explicit constraints. Apply them while running the protocol below.
 
-This skill operates in-place. No external server, no API key beyond the existing Claude session, no separate install.
+This skill is self-contained. It runs entirely within your existing Claude session — no external services, no separate install, no additional API keys. The protocol below is everything the skill does.
 
 ## When to apply
 
@@ -71,7 +71,7 @@ Before delivering, self-check against the spec. Ask:
 - Is it specific and concrete, not generic?
 - Would the inferred audience actually find it useful?
 
-Be honest about a real limitation: self-validation in the same call is less reliable than a separate validator. The MCP-server version of Lucid (the advanced install) runs a separate Validator pass with re-runs on miss. The skill version cannot. So in this skill, treat self-validation as a quality floor — catch obvious failures (missing sections, wrong audience tone, off-target length) — not as a guarantee. If a check obviously fails, revise.
+Treat self-validation as a quality floor — catch obvious failures (missing sections, wrong audience tone, off-target length) — not as a guarantee. If a check obviously fails, revise.
 
 ## How to deliver
 
@@ -95,7 +95,7 @@ It is not a script the user reads. It is internal scaffolding for *your* generat
 
 It is not about being verbose. The protocol compresses intent into structured generation; it does not pad the output with meta-commentary.
 
-It is not a guarantee. It is a floor that lifts median output quality. The advanced MCP-server version of Lucid does more — separate Listener model, prompt caching, separate Validator pass, persistent memory. The skill version trades those for zero setup. Both encode the same protocol; the MCP version measures and re-runs more rigorously.
+It is not a guarantee. It is a floor that lifts median output quality. Apply the protocol consistently; the lift compounds across requests.
 
 ## Why this matters
 
